@@ -6,9 +6,11 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test",
+    "test": "ng test --watch=false",
+    "test:watch": "ng test",
     "lint": "ng lint",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "private": true,
   "packageManager": "npm@11.6.1",
@@ -21,6 +23,7 @@
     "@angular/router": "21.2.0",
     "@capacitor/android": "8.1.0",
     "@capacitor/core": "8.1.0",
+    "dexie": "4.3.0",
     "rxjs": "7.8.0",
     "tslib": "2.3.0"
   },
@@ -34,6 +37,10 @@
     "angular-eslint": "21.2.0",
     "cypress": "15.11.0",
     "eslint": "9.39.2",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-jsdoc": "62.7.1",
+    "eslint-plugin-tsdoc": "0.5.2",
+    "fake-indexeddb": "6.2.5",
     "jsdom": "28.0.0",
     "postcss": "8.5.3",
     "prettier": "3.8.1",
