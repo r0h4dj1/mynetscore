@@ -11,8 +11,8 @@ The application follows a modern frontend-heavy mobile architecture, leveraging 
 - **Presentation Layer:** Built with Angular and Ionic Framework, utilizing modern reactive state management paradigms (Signals).
 - **Styling Layer:** Tailwind CSS provides utility-first styling mapped strictly to the brand identity design tokens.
 - **Business Logic Layer:** Encapsulates the WHS mathematical engine, including the rolling 8-of-20 logic, score differential calculations, and regional rule adjustments (e.g., Golf Australia multiplier).
-- **Data Access Layer:** Uses Drizzle ORM for type-safe and seamless interaction with the local database.
-- **Storage Layer:** An on-device SQLite database handles the persistent storage of user data (Courses, Tees, Rounds).
+- **Data Access Layer:** Uses Dexie.js for type-safe and seamless interaction with the local database.
+- **Storage Layer:** An on-device IndexedDB database handles the persistent storage of user data (Courses, Tees, Rounds).
 - **Native Bridge:** Capacitor serves as the runtime, compiling the web application into native iOS and Android binaries and providing access to native device APIs (like file system for exports).
 
 ## 3. Technology Stack
@@ -20,8 +20,8 @@ The application follows a modern frontend-heavy mobile architecture, leveraging 
 - **Frontend Framework:** Angular (Standalone components, Signals)
 - **UI Components:** Ionic Framework
 - **CSS Framework:** Tailwind CSS
-- **Database:** SQLite (via `@capacitor-community/sqlite` plugin)
-- **ORM:** Drizzle ORM (TypeScript)
+- **Database:** IndexedDB
+- **Database Wrapper:** Dexie.js (TypeScript)
 - **Native Runtime:** Capacitor
 - **Testing:** Vitest (Unit logic), Cypress (E2E journeys)
 - **Tooling:** ESLint, Prettier
@@ -56,3 +56,11 @@ The UI architecture focuses on an intuitive, cascading flow designed for quick, 
 - **Cascading Inputs:** The round logging workflow uses dependent selections (selecting a Course immediately filters available Tees) to minimize friction.
 - **On-the-Fly Creation:** Users can define new Courses or Tees inline during the round logging process, avoiding workflow interruption.
 - **Visual States:** Clear status indicators (e.g., glowing dots for "counting" rounds) make complex WHS rules easily digestible for the user.
+
+## 7. Database Migration Strategy
+
+MyNetScore uses Dexie.js to manage IndexedDB schema versions. Future schema updates must adhere to the following strategy to ensure offline data is never lost:
+
+1. **Version Increment:** When introducing a schema change (e.g., adding a new table or index), increment the version number in `db.ts` (`this.version(X)`).
+2. **Preserve Previous Versions:** Never delete previous `this.version(X).stores(...)` declarations. They are required for Dexie to calculate upgrade paths for older clients.
+3. **Upgrade Hooks:** If data transformation is necessary during an upgrade, chain an `.upgrade()` hook to the new version declaration to perform the migration logic within a transaction.
