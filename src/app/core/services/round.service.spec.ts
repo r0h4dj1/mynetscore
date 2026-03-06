@@ -1,11 +1,19 @@
+import { Injector, runInInjectionContext } from '@angular/core';
 import { RoundService } from './round.service';
 import { db } from '../database/db';
+import { WhsService } from './whs.service';
 
 describe('RoundService', () => {
   let service: RoundService;
 
   beforeEach(async () => {
-    service = new RoundService();
+    const injector = Injector.create({
+      providers: [{ provide: WhsService, useClass: WhsService }],
+    });
+
+    runInInjectionContext(injector, () => {
+      service = new RoundService();
+    });
 
     await db.transaction('rw', db.courses, db.tees, db.rounds, async () => {
       await db.courses.clear();
