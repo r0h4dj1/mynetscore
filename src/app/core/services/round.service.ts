@@ -1,5 +1,6 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { db, Round } from '../database/db';
+import { WhsService } from './whs.service';
 
 /**
  * Service for managing golf rounds.
@@ -8,6 +9,8 @@ import { db, Round } from '../database/db';
   providedIn: 'root',
 })
 export class RoundService {
+  private readonly whsService = inject(WhsService);
+
   /**
    * Adds a new round to the database, calculating its differential.
    *
@@ -29,11 +32,7 @@ export class RoundService {
         throw new Error('Invalid tee slope. Slope must be a number between 55 and 155.');
       }
 
-      // Calculate differential: (Gross Score - Course Rating) x (113 / Slope Rating)
-      // Round to 2dp first to eliminate floating-point noise, then to 1dp.
-      const rawDifferential = (round.grossScore - tee.rating) * (113 / tee.slope);
-      const roundedTo2dp = Math.round(rawDifferential * 100) / 100;
-      const differential = Math.round(roundedTo2dp * 10) / 10;
+      const differential = this.whsService.calculateDifferential(round.grossScore, tee.rating, tee.slope);
 
       const id = crypto.randomUUID();
       const newRound: Round = {

@@ -20,6 +20,11 @@ module.exports = defineConfig([
       jsdoc,
       tsdoc,
     },
+    settings: {
+      jsdoc: {
+        mode: 'typescript',
+      },
+    },
     processor: angular.processInlineTemplates,
     rules: {
       '@angular-eslint/directive-selector': [
@@ -55,11 +60,17 @@ module.exports = defineConfig([
           checkConstructors: false,
         },
       ],
-
       'jsdoc/require-description': 'warn',
+      'jsdoc/require-param': 'warn',
+      'jsdoc/require-param-description': 'warn',
       'jsdoc/require-param-type': 'off',
+      'jsdoc/check-param-names': 'warn',
+      'jsdoc/require-returns': 'warn',
+      'jsdoc/require-returns-description': 'warn',
       'jsdoc/require-returns-type': 'off',
       'jsdoc/no-types': 'warn',
+      'jsdoc/multiline-blocks': 'warn',
+      'jsdoc/tag-lines': ['warn', 'never', { startLines: 1 }],
     },
   },
   {
