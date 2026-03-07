@@ -1,3 +1,11 @@
-/* You can add global styles to this file, and also import other style files */
+/* Define layer order - earlier layers have LOWER priority */
+@layer ionic, base, components, utilities;
 
+/* Import Ionic styles into the lowest-priority layer */
+@import '@ionic/angular/css/core.css' layer(ionic);
+@import '@ionic/angular/css/normalize.css' layer(ionic);
+@import '@ionic/angular/css/structure.css' layer(ionic);
+@import '@ionic/angular/css/typography.css' layer(ionic);
+
+/* Import Tailwind - its utilities will be in the highest-priority layer */
 @import 'tailwindcss';
