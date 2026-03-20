@@ -23,6 +23,10 @@ export const routes: Routes = [
         path: 'courses',
         loadComponent: () => import('./pages/courses/courses.component').then((m) => m.CoursesPage),
       },
+      {
+        path: 'courses/:id',
+        loadComponent: () => import('./pages/course-detail/course-detail.component').then((m) => m.CourseDetailPage),
+      },
     ],
   },
 ];
