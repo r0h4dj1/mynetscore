@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { WHS_LIMITS } from '../constants/whs.constants';
 
 export type HandicapTrend = 'improving' | 'worsening' | 'stable';
 
@@ -36,7 +37,7 @@ export class WhsService {
 
   /**
    * Calculates the differential for a single round.
-   * WHS formula: (Gross Score - Course Rating) x (113 / Slope Rating)
+   * WHS formula: (Gross Score - Course Rating) x (WHS_LIMITS.STANDARD_SLOPE / Slope Rating)
    *
    * @param score - The gross score for the round.
    * @param rating - The Course Rating.
@@ -44,7 +45,7 @@ export class WhsService {
    * @returns The calculated differential.
    */
   calculateDifferential(score: number, rating: number, slope: number): number {
-    const rawDifferential = (score - rating) * (113 / slope);
+    const rawDifferential = (score - rating) * (WHS_LIMITS.STANDARD_SLOPE / slope);
     // Round to 2dp first to eliminate floating-point noise, then to 1dp
     const roundedTo2dp = Math.round(rawDifferential * 100) / 100;
     return Math.round(roundedTo2dp * 10) / 10;

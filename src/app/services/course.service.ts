@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { db, Course, Tee } from '../database/db';
+import { WHS_LIMITS } from '../constants/whs.constants';
 
 /**
  * Service responsible for managing courses and their associated tees
@@ -31,6 +32,33 @@ export class CourseService {
   }
 
   /**
+   * Retrieves all courses with their associated tee counts.
+   * Optimized to avoid N+1 query patterns by fetching all relevant data in two batches
+   * and joining in-memory.
+   *
+   * @returns A promise resolving to an array of courses with tee counts.
+   */
+  async getCoursesWithTeeCounts(): Promise<(Course & { teeCount: number })[]> {
+    return db.transaction('r', [db.courses, db.tees], async () => {
+      const courses = await db.courses.toArray();
+      const allTees = await db.tees.toArray();
+
+      const teeCountMap = allTees.reduce(
+        (acc, tee) => {
+          acc[tee.courseId] = (acc[tee.courseId] || 0) + 1;
+          return acc;
+        },
+        {} as Record<string, number>,
+      );
+
+      return courses.map((course) => ({
+        ...course,
+        teeCount: teeCountMap[course.id] || 0,
+      }));
+    });
+  }
+
+  /**
    * Retrieves a specific course by its ID.
    *
    * @param id - The ID of the course to retrieve.
@@ -52,15 +80,16 @@ export class CourseService {
 
   /**
    * Adds a new tee to a specific course.
-   * Throws an error if the course does not exist or if a tee with the same name already exists for the course.
+   * Throws an error if:
+   * - The slope is not between WHS_LIMITS.MIN_SLOPE and WHS_LIMITS.MAX_SLOPE.
+   * - The course does not exist.
+   * - A tee with the same name already exists for the course.
    *
    * @param tee - The tee object containing the course ID, name, rating, slope, and par.
    * @returns A promise resolving to the generated tee ID.
    */
   async addTee(tee: Omit<Tee, 'id'>): Promise<string> {
-    if (!Number.isFinite(tee.slope) || tee.slope < 55 || tee.slope > 155) {
-      throw new Error('Invalid tee slope. Slope must be a number between 55 and 155.');
-    }
+    this.validateSlope(tee.slope);
 
     const course = await db.courses.get(tee.courseId);
     if (!course) {
@@ -75,6 +104,50 @@ export class CourseService {
     const id = crypto.randomUUID();
     await db.tees.add({ ...tee, id });
     return id;
+  }
+
+  /**
+   * Updates a course name.
+   *
+   * @param id - The course ID to update.
+   * @param name - The new course name.
+   */
+  async updateCourse(id: string, name: string): Promise<void> {
+    const updated = await db.courses.update(id, { name });
+    if (updated === 0) {
+      throw new Error(`Course with ID ${id} does not exist.`);
+    }
+  }
+
+  /**
+   * Updates a tee's editable properties.
+   * Throws an error when slope is outside the allowed WHS range or a duplicate tee name exists for the same course.
+   *
+   * @param id - The tee ID to update.
+   * @param name - The tee name.
+   * @param rating - The course rating.
+   * @param slope - The slope rating.
+   * @param par - The par value.
+   */
+  async updateTee(id: string, name: string, rating: number, slope: number, par: number): Promise<void> {
+    this.validateSlope(slope);
+
+    const currentTee = await db.tees.get(id);
+    if (!currentTee) {
+      throw new Error(`Tee with ID ${id} does not exist.`);
+    }
+
+    const existingTee = await db.tees.where('[courseId+name]').equals([currentTee.courseId, name]).first();
+    if (existingTee && existingTee.id !== id) {
+      throw new Error(`A tee named "${name}" already exists for this course.`);
+    }
+
+    await db.tees.update(id, {
+      name,
+      rating,
+      slope,
+      par,
+    });
   }
 
   /**
@@ -114,5 +187,19 @@ export class CourseService {
 
       await db.courses.delete(courseId);
     });
+  }
+
+  /**
+   * Validates that the slope is within the WHS allowed range.
+   *
+   * @param slope - The slope to validate.
+   * @throws Error if the slope is invalid.
+   */
+  private validateSlope(slope: number): void {
+    if (!Number.isFinite(slope) || slope < WHS_LIMITS.MIN_SLOPE || slope > WHS_LIMITS.MAX_SLOPE) {
+      throw new Error(
+        `Invalid tee slope. Slope must be a number between ${WHS_LIMITS.MIN_SLOPE} and ${WHS_LIMITS.MAX_SLOPE}.`,
+      );
+    }
   }
 }
