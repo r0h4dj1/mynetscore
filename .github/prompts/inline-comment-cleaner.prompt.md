@@ -7,7 +7,7 @@ description: 'Scan selected files to analyze inline comments, removing redundant
 
 ## Instructions
 
-Analyze source code in selected files and clean up inline comments (`//`, `#`, `/* */`) by:
+Analyze source code in selected files and clean up inline comments (`//`, `#`, `/* */`, `<!-- -->`) by:
 
 1. **Remove** comments that are:
    - Obvious explanations of readable code

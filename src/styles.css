@@ -1,3 +1,5 @@
+@import '@fontsource-variable/ibm-plex-sans';
+
 /* Define layer order - earlier layers have LOWER priority */
 @layer ionic, base, components, utilities;
 
@@ -9,3 +11,47 @@
 
 /* Import Tailwind - its utilities will be in the highest-priority layer */
 @import 'tailwindcss';
+
+@theme {
+  --color-championship-gold: oklch(0.8606 0.1731 91.94);
+  --color-championship-gold-tint: oklch(0.9284 0.099751 92.1447);
+  --color-true-obsidian: oklch(0.1785 0.0041 285.98);
+  --color-onyx: oklch(0.2103 0.0059 285.89);
+  --color-graphite: oklch(0.3116 0.0106 285.77);
+  --color-warm-white: oklch(0.9587 0.0027 286.35);
+  --color-warm-white-dim: oklch(0.9197 0.004 286.32);
+  --color-ruby: oklch(0.4496 0.1811 28.83);
+  --color-ruby-tint: oklch(0.6791 0.1947 23.88);
+
+  --color-primary: var(--color-championship-gold);
+  --color-primary-light: var(--color-championship-gold-tint);
+  --color-background: var(--color-true-obsidian);
+  --color-surface: var(--color-onyx);
+  --color-borders: var(--color-graphite);
+  --color-primary-font: var(--color-warm-white);
+  --color-secondary-font: var(--color-warm-white-dim);
+  --color-error: var(--color-ruby);
+  --color-error-light: var(--color-ruby-tint);
+
+  --font-sans: 'IBM Plex Sans Variable', sans-serif;
+  --font-weight-light: 400;
+  --font-weight-medium: 600;
+}
+
+@layer base {
+  :root {
+    --ion-font-family: var(--font-sans);
+    --ion-color-base-icon: var(--color-warm-white-dim);
+  }
+
+  .ion-color-base-icon {
+    --ion-color-base: var(--ion-color-base-icon);
+  }
+
+  body {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    background-color: var(--color-background);
+    color: var(--color-primary-font);
+  }
+}
