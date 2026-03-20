@@ -28,6 +28,21 @@ describe('CourseService', () => {
     });
   });
 
+  describe('updateCourse', () => {
+    it('should update a course name', async () => {
+      const courseId = await service.addCourse('Old Name');
+
+      await service.updateCourse(courseId, 'New Name');
+
+      const course = await db.courses.get(courseId);
+      expect(course).toEqual({ id: courseId, name: 'New Name' });
+    });
+
+    it('should throw an error when updating a non-existent course', async () => {
+      await expect(service.updateCourse('missing-course', 'Renamed')).rejects.toThrow(/does not exist/);
+    });
+  });
+
   describe('addTee', () => {
     it('should add a tee if the course exists and tee name is unique', async () => {
       const courseId = await service.addCourse('Augusta National');
@@ -127,6 +142,68 @@ describe('CourseService', () => {
       // Verify tee was not deleted
       const tee = await db.tees.get(teeId);
       expect(tee).toBeDefined();
+    });
+  });
+
+  describe('updateTee', () => {
+    it('should update tee fields when validation passes', async () => {
+      const courseId = await service.addCourse('TPC Sawgrass');
+      const teeId = await service.addTee({
+        courseId,
+        name: 'Gold',
+        rating: 73,
+        slope: 140,
+        par: 72,
+      });
+
+      await service.updateTee(teeId, 'Championship', 74.4, 145, 72);
+
+      const tee = await db.tees.get(teeId);
+      expect(tee).toMatchObject({
+        id: teeId,
+        courseId,
+        name: 'Championship',
+        rating: 74.4,
+        slope: 145,
+        par: 72,
+      });
+    });
+
+    it('should throw an error for invalid slope during tee update', async () => {
+      const courseId = await service.addCourse('Royal County Down');
+      const teeId = await service.addTee({
+        courseId,
+        name: 'Blue',
+        rating: 72,
+        slope: 130,
+        par: 71,
+      });
+
+      await expect(service.updateTee(teeId, 'Blue', 72, 200, 71)).rejects.toThrow(/Invalid tee slope/);
+    });
+
+    it('should throw an error if updated tee name duplicates another tee on the same course', async () => {
+      const courseId = await service.addCourse('Kiawah Island');
+      await service.addTee({
+        courseId,
+        name: 'Black',
+        rating: 77,
+        slope: 150,
+        par: 72,
+      });
+      const teeId = await service.addTee({
+        courseId,
+        name: 'Blue',
+        rating: 74,
+        slope: 140,
+        par: 72,
+      });
+
+      await expect(service.updateTee(teeId, 'Black', 74, 140, 72)).rejects.toThrow(/already exists/);
+    });
+
+    it('should throw an error when updating a non-existent tee', async () => {
+      await expect(service.updateTee('missing-tee', 'White', 70, 113, 72)).rejects.toThrow(/does not exist/);
     });
   });
 
