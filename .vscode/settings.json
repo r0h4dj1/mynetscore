@@ -2,5 +2,6 @@
   "sonarlint.connectedMode.project": {
     "connectionId": "r0h4dj1",
     "projectKey": "r0h4dj1_mynetscore"
-  }
+  },
+  "css.lint.unknownAtRules": "ignore"
 }
