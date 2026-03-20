@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { db, Round } from '../database/db';
 import { WhsService } from './whs.service';
+import { WHS_LIMITS } from '../constants/whs.constants';
 
 /**
  * Service for managing golf rounds.
@@ -28,8 +29,10 @@ export class RoundService {
         throw new Error(`Tee with ID ${round.teeId} does not exist.`);
       }
 
-      if (!Number.isFinite(tee.slope) || tee.slope < 55 || tee.slope > 155) {
-        throw new Error('Invalid tee slope. Slope must be a number between 55 and 155.');
+      if (!Number.isFinite(tee.slope) || tee.slope < WHS_LIMITS.MIN_SLOPE || tee.slope > WHS_LIMITS.MAX_SLOPE) {
+        throw new Error(
+          `Invalid tee slope. Slope must be a number between ${WHS_LIMITS.MIN_SLOPE} and ${WHS_LIMITS.MAX_SLOPE}.`,
+        );
       }
 
       const differential = this.whsService.calculateDifferential(round.grossScore, tee.rating, tee.slope);
