@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
-import { IonTabs, IonTabBar, IonTabButton } from '@ionic/angular/standalone';
+import { IonTabs, IonTabBar, IonTabButton, IonIcon } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { home, book, golf } from 'ionicons/icons';
 
 /**
  * Component representing the main tabs container.
@@ -8,6 +10,14 @@ import { IonTabs, IonTabBar, IonTabButton } from '@ionic/angular/standalone';
   selector: 'app-tabs',
   templateUrl: './tabs.component.html',
   standalone: true,
-  imports: [IonTabs, IonTabBar, IonTabButton],
+  imports: [IonTabs, IonTabBar, IonTabButton, IonIcon],
 })
-export class TabsComponent {}
+export class TabsComponent {
+  constructor() {
+    addIcons({
+      home,
+      book,
+      golf,
+    });
+  }
+}

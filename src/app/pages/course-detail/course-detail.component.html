@@ -1,0 +1,253 @@
+<div class="flex flex-col h-full">
+  <header class="flex items-center justify-between px-4 py-3 pt-10 border-b border-borders shrink-0">
+    <div class="flex items-center min-w-0">
+      <a
+        routerLink="/courses"
+        aria-label="Back to courses"
+        class="mr-2 flex items-center justify-center p-2 -ml-2 rounded-full active:bg-surface transition-colors"
+      >
+        <ion-icon name="chevron-back" class="text-2xl" color="base-icon"></ion-icon>
+      </a>
+      <h1 class="text-xl font-medium text-primary-font truncate m-0">{{ course?.name || 'Course Details' }}</h1>
+    </div>
+    <button
+      type="button"
+      (click)="openEditCourseModal()"
+      title="Edit course"
+      aria-label="Edit course"
+      class="bg-transparent border-none outline-none p-2 -mr-2 active:bg-surface transition-colors flex items-center justify-center"
+    >
+      <ion-icon name="create" class="text-2xl" color="base-icon"></ion-icon>
+    </button>
+  </header>
+
+  <main class="flex-1 overflow-y-auto">
+    @if (course) {
+      <div class="px-4 py-6 h-full flex flex-col gap-8">
+        <div>
+          <h2 class="font-light text-secondary-font mb-3 mt-0">Tees</h2>
+
+          @if (tees.length === 0) {
+            <div class="flex flex-col items-center justify-center py-10 text-center px-6">
+              <h2 class="text-secondary-font m-0">No tees saved</h2>
+            </div>
+          }
+
+          <div class="space-y-3">
+            @for (tee of tees; track tee.id) {
+              <button
+                type="button"
+                (click)="openEditTeeModal(tee)"
+                class="w-full text-left bg-surface rounded-2xl p-4 active:scale-[0.98] transition-transform border-none outline-none"
+              >
+                <div>
+                  <h3 class="text-lg font-medium text-primary-font mb-1 mt-0">{{ tee.name }}</h3>
+                  <div class="text-secondary-font font-light">
+                    CR <span class="text-primary">{{ tee.rating }}</span> · SR
+                    <span class="text-primary">{{ tee.slope }}</span> · Par
+                    <span class="text-primary">{{ tee.par }}</span>
+                  </div>
+                </div>
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="bg-surface rounded-2xl p-5">
+          <h2 class="text-lg font-medium text-primary-font mb-6 mt-0">Add tee</h2>
+          <form [formGroup]="teeForm" (ngSubmit)="onAddTeeSubmit()" class="flex flex-col gap-5">
+            <div>
+              <label class="block text-xs font-light text-secondary-font mb-2" for="teeName">Tee name</label>
+              <input
+                id="teeName"
+                formControlName="teeName"
+                class="w-full bg-background border border-borders rounded-xl px-4 py-3 text-base text-primary-font focus:outline-none focus:border-primary box-border"
+                [appValidationStatus]="teeSubmitCount"
+                type="text"
+              />
+            </div>
+
+            <div class="flex gap-3">
+              <div class="flex-1 min-w-0">
+                <label class="block text-xs font-light text-secondary-font mb-2" for="rating">Course rating</label>
+                <input
+                  id="rating"
+                  formControlName="rating"
+                  class="w-full bg-background border border-borders rounded-xl px-3 py-3 text-base text-primary-font focus:outline-none focus:border-primary box-border"
+                  [appValidationStatus]="teeSubmitCount"
+                  type="number"
+                  inputmode="decimal"
+                  step="0.1"
+                />
+              </div>
+
+              <div class="flex-1 min-w-0">
+                <label class="block text-xs font-light text-secondary-font mb-2" for="slope">Slope rating</label>
+                <input
+                  id="slope"
+                  formControlName="slope"
+                  class="w-full bg-background border border-borders rounded-xl px-3 py-3 text-base text-primary-font focus:outline-none focus:border-primary box-border"
+                  [appValidationStatus]="teeSubmitCount"
+                  type="number"
+                  inputmode="numeric"
+                />
+              </div>
+
+              <div class="flex-1 min-w-0">
+                <label class="block text-xs font-light text-secondary-font mb-2" for="par">Par</label>
+                <input
+                  id="par"
+                  formControlName="par"
+                  class="w-full bg-background border border-borders rounded-xl px-3 py-3 text-base text-primary-font focus:outline-none focus:border-primary box-border"
+                  [appValidationStatus]="teeSubmitCount"
+                  type="number"
+                  inputmode="numeric"
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              class="mt-2 w-full h-14 rounded-lg font-medium text-lg bg-primary text-true-obsidian border-none outline-none active:scale-[0.98] transition-transform flex items-center justify-center"
+            >
+              Save tee
+            </button>
+          </form>
+        </div>
+      </div>
+    }
+  </main>
+
+  <ion-modal
+    #editCourseModal
+    [initialBreakpoint]="1"
+    [breakpoints]="[0, 1]"
+    handle="true"
+    handleBehavior="cycle"
+    [style.--height]="'auto'"
+  >
+    <ng-template>
+      <div class="flex flex-col bg-surface pb-8">
+        <header class="px-4 pt-6 pb-4 border-b border-borders shrink-0">
+          <h2 class="text-2xl font-medium m-0 text-primary-font">Edit course</h2>
+        </header>
+
+        <div class="flex-1 px-4 py-6">
+          <form [formGroup]="editCourseForm" (ngSubmit)="onEditCourseSubmit()" class="flex flex-col gap-6">
+            <div>
+              <label class="block text-xs font-light text-secondary-font mb-2" for="editCourseName">Course name</label>
+              <input
+                id="editCourseName"
+                formControlName="courseName"
+                class="w-full bg-background border border-borders rounded-xl px-4 py-3 text-base text-primary-font focus:outline-none focus:border-primary box-border"
+                type="text"
+              />
+            </div>
+
+            <div class="flex flex-col gap-3 pt-2">
+              <button
+                type="submit"
+                class="w-full h-14 rounded-lg font-medium text-lg bg-primary text-true-obsidian border-none outline-none active:scale-[0.98] transition-transform flex items-center justify-center"
+              >
+                Save course
+              </button>
+
+              <button
+                type="button"
+                (click)="onDeleteCourse()"
+                class="w-full h-14 rounded-lg font-medium text-lg bg-onyx text-error-light border border-error-light outline-none active:scale-[0.98] transition-transform flex items-center justify-center"
+              >
+                Delete course
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </ng-template>
+  </ion-modal>
+
+  <ion-modal
+    #editTeeModal
+    [initialBreakpoint]="1"
+    [breakpoints]="[0, 1]"
+    handle="true"
+    handleBehavior="cycle"
+    [style.--height]="'auto'"
+  >
+    <ng-template>
+      <div class="flex flex-col bg-surface pb-8">
+        <header class="px-4 pt-6 pb-4 border-b border-borders shrink-0">
+          <h2 class="text-2xl font-medium m-0 text-primary-font">Edit tee</h2>
+        </header>
+
+        <div class="flex-1 px-4 py-6">
+          <form [formGroup]="editTeeForm" (ngSubmit)="onEditTeeSubmit()" class="flex flex-col gap-6">
+            <div>
+              <label class="block text-xs font-light text-secondary-font mb-2" for="editTeeName">Tee name</label>
+              <input
+                id="editTeeName"
+                formControlName="teeName"
+                class="w-full bg-background border border-borders rounded-xl px-4 py-3 text-base text-primary-font focus:outline-none focus:border-primary box-border"
+                type="text"
+              />
+            </div>
+
+            <div class="flex gap-3">
+              <div class="flex-1 min-w-0">
+                <label class="block text-xs font-light text-secondary-font mb-2" for="editRating">Course rating</label>
+                <input
+                  id="editRating"
+                  formControlName="rating"
+                  class="w-full bg-background border border-borders rounded-xl px-3 py-3 text-base text-primary-font focus:outline-none focus:border-primary box-border"
+                  type="number"
+                  inputmode="decimal"
+                  step="0.1"
+                />
+              </div>
+
+              <div class="flex-1 min-w-0">
+                <label class="block text-xs font-light text-secondary-font mb-2" for="editSlope">Slope rating</label>
+                <input
+                  id="editSlope"
+                  formControlName="slope"
+                  class="w-full bg-background border border-borders rounded-xl px-3 py-3 text-base text-primary-font focus:outline-none focus:border-primary box-border"
+                  type="number"
+                  inputmode="numeric"
+                />
+              </div>
+
+              <div class="flex-1 min-w-0">
+                <label class="block text-xs font-light text-secondary-font mb-2" for="editPar">Par</label>
+                <input
+                  id="editPar"
+                  formControlName="par"
+                  class="w-full bg-background border border-borders rounded-xl px-3 py-3 text-base text-primary-font focus:outline-none focus:border-primary box-border"
+                  type="number"
+                  inputmode="numeric"
+                />
+              </div>
+            </div>
+
+            <div class="flex flex-col gap-3 pt-2">
+              <button
+                type="submit"
+                class="w-full h-14 rounded-lg font-medium text-lg bg-primary text-true-obsidian border-none outline-none active:scale-[0.98] transition-transform flex items-center justify-center"
+              >
+                Save tee
+              </button>
+
+              <button
+                type="button"
+                [disabled]="!editingTeeId"
+                (click)="editingTeeId && onDeleteTee(editingTeeId)"
+                class="w-full h-14 rounded-lg font-medium text-lg bg-surface text-error-light border border-error-light outline-none active:scale-[0.98] transition-transform flex items-center justify-center"
+              >
+                Delete tee
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </ng-template>
+  </ion-modal>
+</div>
