@@ -70,4 +70,24 @@ describe('HandicapStateService', () => {
     expect(service.handicapIndex()).toBe(8.4);
     expect(service.usedDifferentials()).toEqual([9.4]);
   });
+
+  it('exposes the current WHS counting slice when more than 20 rounds exist', async () => {
+    const rounds = Array.from({ length: 21 }, (_, index) => {
+      const day = (index + 1).toString().padStart(2, '0');
+      return {
+        id: `r${index + 1}`,
+        teeId: 't1',
+        date: `2026-03-${day}`,
+        grossScore: 90 - index,
+        differential: 21 - index,
+      };
+    });
+
+    await db.rounds.bulkAdd(rounds);
+    await service.refresh();
+
+    expect(service.totalRoundsCounted()).toBe(20);
+    expect(service.usedDifferentials()).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
+    expect(service.handicapIndex()).toBe(4.5);
+  });
 });

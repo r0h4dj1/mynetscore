@@ -1,0 +1,210 @@
+<div class="relative flex flex-col h-full bg-true-obsidian">
+  <header class="flex items-center justify-between px-4 py-3 pt-10 border-b border-borders shrink-0">
+    <div class="flex items-center min-w-0">
+      <a
+        routerLink="/rounds"
+        aria-label="Back to rounds"
+        class="mr-2 flex items-center justify-center p-2 -ml-2 rounded-full active:bg-surface transition-colors"
+      >
+        <ion-icon name="chevron-back" class="text-2xl" color="base-icon"></ion-icon>
+      </a>
+      <h1 class="text-xl font-medium text-primary-font truncate m-0">Add round</h1>
+    </div>
+  </header>
+
+  <main class="flex-1 overflow-y-auto px-4 py-6">
+    <form [formGroup]="roundForm" (ngSubmit)="onSubmit()" class="flex flex-col min-h-full">
+      <div class="flex flex-col gap-6">
+        <section>
+          <div class="flex items-center justify-between mb-2">
+            <label class="block text-xs font-medium text-primary-font" for="courseId">Course</label>
+            <button
+              type="button"
+              class="bg-transparent border-none p-0 text-xs font-medium text-primary active:opacity-80"
+              (click)="openAddCourseModal()"
+            >
+              + Add new course
+            </button>
+          </div>
+
+          <div
+            class="relative rounded-xl border bg-surface"
+            [class.border-danger]="shouldShowError('courseId')"
+            [class.border-borders]="!shouldShowError('courseId')"
+          >
+            <select
+              id="courseId"
+              formControlName="courseId"
+              class="w-full appearance-none bg-transparent border-none rounded-xl px-4 py-4 pr-12 text-base text-primary-font focus:outline-none"
+              [class.text-secondary-font]="!roundForm.controls.courseId.value"
+              (change)="onCourseChanged($any($event.target).value)"
+            >
+              <option value="">Select a course...</option>
+              @for (course of courses; track course.id) {
+                <option [value]="course.id">{{ course.name }}</option>
+              }
+            </select>
+            <ion-icon
+              name="chevron-down"
+              class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-lg"
+              color="base-icon"
+            ></ion-icon>
+          </div>
+        </section>
+
+        <section>
+          <div class="flex items-center justify-between mb-2">
+            <label class="block text-xs font-medium text-primary-font" for="teeId">Tee</label>
+            <button
+              type="button"
+              class="bg-transparent border-none p-0 text-xs font-medium active:opacity-80"
+              [class.text-primary]="!isAddTeeDisabled"
+              [class.text-secondary-font]="isAddTeeDisabled"
+              [disabled]="isAddTeeDisabled"
+              (click)="openAddTeeModal()"
+            >
+              + Add new tee
+            </button>
+          </div>
+
+          <div
+            class="relative rounded-xl border bg-surface"
+            [class.opacity-50]="roundForm.controls.teeId.disabled"
+            [class.border-danger]="shouldShowError('teeId')"
+            [class.border-borders]="!shouldShowError('teeId')"
+          >
+            <select
+              id="teeId"
+              formControlName="teeId"
+              class="w-full appearance-none bg-transparent border-none rounded-xl px-4 py-4 pr-12 text-base text-primary-font focus:outline-none"
+              [class.text-secondary-font]="!roundForm.controls.teeId.value"
+            >
+              <option value="">Select a tee...</option>
+              @for (tee of tees; track tee.id) {
+                <option [value]="tee.id">{{ tee.name }} - {{ tee.rating }} / {{ tee.slope }}</option>
+              }
+            </select>
+            <ion-icon
+              name="chevron-down"
+              class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-lg"
+              color="base-icon"
+            ></ion-icon>
+          </div>
+        </section>
+
+        <div class="h-px bg-borders my-1"></div>
+
+        <section>
+          <label class="block text-xs font-medium text-primary-font mb-2" for="date">Date played</label>
+          <button
+            type="button"
+            class="relative rounded-xl border bg-surface"
+            [class.border-danger]="shouldShowError('date')"
+            [class.border-borders]="!shouldShowError('date')"
+            (click)="openDatePicker()"
+          >
+            <span id="date" class="block w-full px-4 py-4 pr-12 text-left text-base text-primary-font">
+              {{ formattedDateLabel }}
+            </span>
+            <ion-icon
+              name="calendar"
+              class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-lg"
+              color="base-icon"
+            ></ion-icon>
+          </button>
+        </section>
+
+        <section>
+          <label class="block text-xs font-medium text-primary-font mb-2" for="grossScore">Gross score</label>
+          <input
+            id="grossScore"
+            formControlName="grossScore"
+            type="number"
+            inputmode="numeric"
+            [min]="minGrossScore"
+            [max]="maxGrossScore"
+            class="w-full bg-surface border rounded-xl px-4 py-4 text-base text-primary-font focus:outline-none box-border"
+            [class.border-danger]="shouldShowError('grossScore')"
+            [class.border-borders]="!shouldShowError('grossScore')"
+          />
+        </section>
+      </div>
+
+      <div class="mt-auto pt-8 pb-6">
+        <button
+          type="submit"
+          class="w-full flex items-center justify-center rounded-2xl border-none px-4 py-4 text-base font-semibold transition-transform active:scale-[0.98]"
+          [class.bg-primary]="roundForm.valid && !isSaving"
+          [class.text-true-obsidian]="roundForm.valid && !isSaving"
+          [class.bg-borders]="!roundForm.valid || isSaving"
+          [class.text-primary-font]="!roundForm.valid || isSaving"
+          [disabled]="isSaving"
+        >
+          {{ isSaving ? 'Saving...' : 'Save round' }}
+        </button>
+
+        @if (saveHelperText) {
+          <p class="mt-3 mb-0 text-center text-xs text-secondary-font">{{ saveHelperText }}</p>
+        }
+      </div>
+    </form>
+  </main>
+
+  <app-add-course-modal (saved)="onCourseCreated($event)"></app-add-course-modal>
+  <app-add-tee-modal [courseId]="selectedCourseId || null" (saved)="onTeeCreated($event)"></app-add-tee-modal>
+
+  @if (showDatePicker) {
+    <div class="absolute inset-0 z-20 flex items-end justify-center bg-black/60 px-4 pb-8">
+      <div class="w-full max-w-md overflow-hidden rounded-3xl border border-borders bg-surface shadow-2xl">
+        <div class="flex items-center justify-between border-b border-borders px-6 py-4">
+          <h2 class="m-0 text-lg font-semibold text-primary-font">Select date</h2>
+          <button
+            type="button"
+            class="border-none bg-transparent p-0 text-sm font-medium text-primary-font"
+            (click)="closeDatePicker()"
+          >
+            Cancel
+          </button>
+        </div>
+
+        <ion-datetime
+          [value]="roundForm.controls.date.value"
+          presentation="date"
+          [max]="todayIsoDate"
+          preferWheel="false"
+          showDefaultButtons="false"
+          (ionChange)="onDateSelected($event)"
+        ></ion-datetime>
+      </div>
+    </div>
+  }
+
+  @if (showDuplicateConfirmation) {
+    <div class="absolute inset-0 z-20 flex items-end justify-center bg-black/60 px-4 pb-8">
+      <div class="w-full max-w-md overflow-hidden rounded-3xl border border-borders bg-surface shadow-2xl">
+        <div class="px-6 py-6 text-center">
+          <h2 class="m-0 text-xl font-semibold text-primary-font">Duplicate round?</h2>
+          <p class="mt-3 mb-0 text-sm leading-6 text-secondary-font">{{ duplicateSummary }}</p>
+          <p class="mt-3 mb-0 text-sm font-medium text-primary-font">Log another round anyway?</p>
+        </div>
+
+        <div class="grid grid-cols-2 border-t border-borders">
+          <button
+            type="button"
+            class="border-none bg-transparent px-4 py-4 text-base font-medium text-primary-font"
+            (click)="cancelDuplicateConfirmation()"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="border-none border-l border-borders bg-transparent px-4 py-4 text-base font-semibold text-primary"
+            (click)="confirmDuplicateSave()"
+          >
+            Log anyway
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

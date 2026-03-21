@@ -97,4 +97,19 @@ describe('AddCourseModalComponent', () => {
     expect(component.addCourseSubmitCount).toBe(0);
     expect(component.courseForm.get('courseName')?.value).toBeNull();
   });
+
+  it('surfaces service errors', async () => {
+    component.courseForm.setValue({
+      courseName: 'Royal County Down',
+      teeName: 'Blue',
+      rating: 73.4,
+      slope: 134,
+      par: 72,
+    });
+    courseServiceMock.addCourse.mockRejectedValue(new Error('Duplicate course.'));
+
+    await component.onSubmit();
+
+    expect(toastServiceMock.presentErrorToast).toHaveBeenCalledWith('Duplicate course.');
+  });
 });

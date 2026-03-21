@@ -1,0 +1,415 @@
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ViewChild, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+import { IonDatetime, IonIcon } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { calendar, chevronBack, chevronDown } from 'ionicons/icons';
+import {
+  AddCourseModalComponent,
+  AddCourseModalResult,
+} from '../../components/add-course-modal/add-course-modal.component';
+import { AddTeeModalComponent } from '../../components/add-tee-modal/add-tee-modal.component';
+import { Course, Tee } from '../../database/db';
+import { ROUND_LIMITS } from '../../constants/whs.constants';
+import { CourseService } from '../../services/course.service';
+import { HandicapStateService } from '../../services/handicap-state.service';
+import { RoundService } from '../../services/round.service';
+import { ToastService } from '../../services/toast.service';
+
+interface RoundFormValue {
+  courseId: string;
+  teeId: string;
+  date: string;
+  grossScore: string;
+}
+
+interface PendingRoundPayload {
+  teeId: string;
+  date: string;
+  grossScore: number;
+}
+
+/**
+ * Component representing the page for adding a new round.
+ */
+@Component({
+  selector: 'app-add-round',
+  templateUrl: './add-round.component.html',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterLink,
+    IonIcon,
+    IonDatetime,
+    AddCourseModalComponent,
+    AddTeeModalComponent,
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class AddRoundPage {
+  private readonly courseService = inject(CourseService);
+  private readonly roundService = inject(RoundService);
+  private readonly handicapStateService = inject(HandicapStateService);
+  private readonly toastService = inject(ToastService);
+  private readonly router = inject(Router);
+  private readonly fb = inject(FormBuilder);
+  private readonly cdr = inject(ChangeDetectorRef);
+
+  @ViewChild(AddCourseModalComponent) addCourseModal?: AddCourseModalComponent;
+  @ViewChild(AddTeeModalComponent) addTeeModal?: AddTeeModalComponent;
+
+  readonly todayIsoDate = this.getTodayIsoDate();
+  readonly minGrossScore = ROUND_LIMITS.MIN_GROSS_SCORE;
+  readonly maxGrossScore = ROUND_LIMITS.MAX_GROSS_SCORE;
+
+  readonly roundForm = this.fb.nonNullable.group({
+    courseId: ['', Validators.required],
+    teeId: [{ value: '', disabled: true }, Validators.required],
+    date: [this.todayIsoDate, [Validators.required, this.futureDateValidator()]],
+    grossScore: [
+      '',
+      [
+        Validators.required,
+        Validators.min(ROUND_LIMITS.MIN_GROSS_SCORE),
+        Validators.max(ROUND_LIMITS.MAX_GROSS_SCORE),
+        Validators.pattern(/^\d+$/),
+      ],
+    ],
+  });
+
+  courses: Course[] = [];
+  tees: Tee[] = [];
+  submitCount = 0;
+  isSaving = false;
+  showDatePicker = false;
+  showDuplicateConfirmation = false;
+  duplicateSummary = '';
+  private pendingRoundPayload: PendingRoundPayload | null = null;
+
+  constructor() {
+    addIcons({
+      calendar,
+      chevronBack,
+      chevronDown,
+    });
+  }
+
+  /**
+   * Ionic lifecycle hook — fires every time the view becomes active.
+   */
+  ionViewWillEnter(): void {
+    void this.loadCourses();
+  }
+
+  /**
+   * Returns whether a field should currently show its invalid state.
+   *
+   * @param controlName - The form control name to inspect.
+   * @returns Whether the control should display its invalid styling.
+   */
+  shouldShowError(controlName: keyof RoundFormValue): boolean {
+    const control = this.roundForm.controls[controlName];
+    return !!control && control.invalid && (control.touched || this.submitCount > 0);
+  }
+
+  /**
+   * Handles a user changing the selected course.
+   *
+   * @param courseId - The newly selected course identifier.
+   */
+  async onCourseChanged(courseId: string): Promise<void> {
+    this.roundForm.controls.courseId.setValue(courseId);
+    await this.applySelectedCourse(courseId);
+  }
+
+  /**
+   * Opens the inline add-course modal.
+   */
+  async openAddCourseModal(): Promise<void> {
+    await this.addCourseModal?.present();
+  }
+
+  /**
+   * Opens the inline add-tee modal for the selected course.
+   */
+  async openAddTeeModal(): Promise<void> {
+    if (!this.selectedCourseId) {
+      return;
+    }
+
+    await this.addTeeModal?.present();
+  }
+
+  /**
+   * Updates local state after a course and its initial tee were created inline.
+   *
+   * @param result - The saved course and tee returned by the add-course modal.
+   */
+  async onCourseCreated(result: AddCourseModalResult): Promise<void> {
+    this.courses = this.sortByName([...this.courses, result.course]);
+    this.roundForm.controls.courseId.setValue(result.course.id);
+    this.tees = [result.tee];
+    this.roundForm.controls.teeId.enable();
+    this.roundForm.controls.teeId.setValue(result.tee.id);
+    this.cdr.markForCheck();
+  }
+
+  /**
+   * Updates local tee options after a new tee was created inline.
+   *
+   * @param tee - The tee returned by the add-tee modal.
+   */
+  onTeeCreated(tee: Tee): void {
+    this.tees = this.sortByName([...this.tees, tee]);
+    this.roundForm.controls.teeId.setValue(tee.id);
+    this.cdr.markForCheck();
+  }
+
+  /**
+   * Starts the save flow, optionally bypassing the duplicate prompt.
+   *
+   * @param skipDuplicateCheck - Whether duplicate detection should be bypassed.
+   */
+  async onSubmit(skipDuplicateCheck = false): Promise<void> {
+    this.submitCount++;
+    this.roundForm.markAllAsTouched();
+
+    if (this.roundForm.invalid || this.isSaving) {
+      this.cdr.markForCheck();
+      return;
+    }
+
+    const payload = this.buildRoundPayload();
+
+    if (!skipDuplicateCheck) {
+      const duplicateRound = await this.roundService.findDuplicateRound(payload.teeId, payload.date);
+      if (duplicateRound) {
+        this.pendingRoundPayload = payload;
+        this.duplicateSummary = this.buildDuplicateSummary();
+        this.showDuplicateConfirmation = true;
+        this.cdr.markForCheck();
+        return;
+      }
+    }
+
+    await this.saveRound(payload);
+  }
+
+  /**
+   * Cancels the duplicate confirmation dialog.
+   */
+  cancelDuplicateConfirmation(): void {
+    this.showDuplicateConfirmation = false;
+    this.pendingRoundPayload = null;
+    this.cdr.markForCheck();
+  }
+
+  /**
+   * Confirms the duplicate and persists the round anyway.
+   */
+  async confirmDuplicateSave(): Promise<void> {
+    if (!this.pendingRoundPayload) {
+      return;
+    }
+
+    const pendingPayload = this.pendingRoundPayload;
+    this.showDuplicateConfirmation = false;
+    this.pendingRoundPayload = null;
+    this.cdr.markForCheck();
+    await this.saveRound(pendingPayload);
+  }
+
+  /**
+   * Returns the helper text shown beneath the save button when the form is incomplete.
+   *
+   * @returns The helper copy for the current save-button state.
+   */
+  get saveHelperText(): string {
+    return this.roundForm.valid ? '' : 'Complete all required fields';
+  }
+
+  /**
+   * Returns the currently selected course identifier.
+   *
+   * @returns The selected course ID, if one exists.
+   */
+  get selectedCourseId(): string {
+    return this.roundForm.controls.courseId.getRawValue();
+  }
+
+  /**
+   * Returns the formatted date label used in the date field.
+   *
+   * @returns The human-readable date label shown in the trigger row.
+   */
+  get formattedDateLabel(): string {
+    const value = this.roundForm.controls.date.getRawValue();
+    if (!value) {
+      return '';
+    }
+
+    return `${this.isToday(value) ? 'Today' : 'Date'} - ${this.formatDate(value)}`;
+  }
+
+  /**
+   * Returns whether the tee action should be disabled.
+   *
+   * @returns Whether the add-tee action should be unavailable.
+   */
+  get isAddTeeDisabled(): boolean {
+    return !this.selectedCourseId;
+  }
+
+  /**
+   * Opens the date picker overlay.
+   */
+  openDatePicker(): void {
+    this.showDatePicker = true;
+    this.cdr.markForCheck();
+  }
+
+  /**
+   * Closes the date picker overlay.
+   */
+  closeDatePicker(): void {
+    this.showDatePicker = false;
+    this.cdr.markForCheck();
+  }
+
+  /**
+   * Applies the chosen date from the Ionic datetime component.
+   *
+   * @param event - The Ionic change event containing the selected date value.
+   */
+  onDateSelected(event: CustomEvent<{ value?: string | string[] | null }>): void {
+    const value = event.detail.value;
+    const selectedValue = Array.isArray(value) ? value[0] : value;
+
+    if (!selectedValue) {
+      return;
+    }
+
+    this.roundForm.controls.date.setValue(selectedValue.slice(0, 10));
+    this.roundForm.controls.date.markAsTouched();
+    this.closeDatePicker();
+  }
+
+  /**
+   * Loads persisted courses and refreshes tee options for any active selection.
+   */
+  async loadCourses(): Promise<void> {
+    try {
+      const courses = await this.courseService.getCourses();
+      this.courses = this.sortByName(courses);
+      await this.applySelectedCourse(this.selectedCourseId, false);
+    } catch {
+      await this.toastService.presentErrorToast('Failed to load courses.');
+    } finally {
+      this.cdr.markForCheck();
+    }
+  }
+
+  private async applySelectedCourse(courseId: string, resetTeeSelection = true): Promise<void> {
+    if (!courseId) {
+      this.tees = [];
+      this.roundForm.controls.teeId.reset('');
+      this.roundForm.controls.teeId.disable();
+      this.cdr.markForCheck();
+      return;
+    }
+
+    try {
+      const tees = await this.courseService.getTees(courseId);
+      this.tees = this.sortByName(tees);
+      this.roundForm.controls.teeId.enable();
+
+      if (resetTeeSelection || !this.tees.some((tee) => tee.id === this.roundForm.controls.teeId.getRawValue())) {
+        this.roundForm.controls.teeId.reset('');
+      }
+    } catch {
+      this.tees = [];
+      this.roundForm.controls.teeId.reset('');
+      this.roundForm.controls.teeId.disable();
+      await this.toastService.presentErrorToast('Failed to load tees.');
+    } finally {
+      this.cdr.markForCheck();
+    }
+  }
+
+  private buildRoundPayload(): PendingRoundPayload {
+    const value = this.roundForm.getRawValue();
+    return {
+      teeId: value.teeId,
+      date: value.date,
+      grossScore: Number(value.grossScore),
+    };
+  }
+
+  private async saveRound(payload: PendingRoundPayload): Promise<void> {
+    this.isSaving = true;
+    this.cdr.markForCheck();
+
+    try {
+      await this.roundService.addRound(payload);
+      await this.handicapStateService.refresh();
+      await this.router.navigateByUrl('/rounds');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to save round.';
+      await this.toastService.presentErrorToast(message);
+    } finally {
+      this.isSaving = false;
+      this.cdr.markForCheck();
+    }
+  }
+
+  private buildDuplicateSummary(): string {
+    const selectedCourse = this.courses.find((course) => course.id === this.selectedCourseId);
+    const selectedTee = this.tees.find((tee) => tee.id === this.roundForm.controls.teeId.getRawValue());
+
+    if (!selectedCourse || !selectedTee) {
+      return `A round already exists for ${this.formatDate(this.roundForm.controls.date.getRawValue())}.`;
+    }
+
+    return `A round on ${selectedTee.name} tee at ${selectedCourse.name} already exists for ${this.formatDate(this.roundForm.controls.date.getRawValue())}.`;
+  }
+
+  private futureDateValidator(): ValidatorFn {
+    return (control): ValidationErrors | null => {
+      const value = control.value;
+      if (!value) {
+        return null;
+      }
+
+      return value > this.getTodayIsoDate() ? { futureDate: true } : null;
+    };
+  }
+
+  private getTodayIsoDate(): string {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = `${today.getMonth() + 1}`.padStart(2, '0');
+    const day = `${today.getDate()}`.padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  private isToday(value: string): boolean {
+    return value === this.todayIsoDate;
+  }
+
+  private formatDate(value: string): string {
+    const [year, month, day] = value.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+
+    return new Intl.DateTimeFormat('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    }).format(date);
+  }
+
+  private sortByName<T extends { name: string }>(items: T[]): T[] {
+    return [...items].sort((a, b) => a.name.localeCompare(b.name));
+  }
+}

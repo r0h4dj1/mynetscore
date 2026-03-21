@@ -85,6 +85,17 @@ describe('AddTeeModalComponent', () => {
     });
   });
 
+  it('shows a validation error when the form is invalid', async () => {
+    component.courseId = 'course-1';
+
+    await component.onSubmit();
+
+    expect(courseServiceMock.addTee).not.toHaveBeenCalled();
+    expect(toastServiceMock.presentErrorToast).toHaveBeenCalledWith(
+      'Please ensure all fields are correctly filled out.',
+    );
+  });
+
   it('surfaces service errors', async () => {
     component.courseId = 'course-1';
     component.teeForm.setValue({
@@ -98,5 +109,15 @@ describe('AddTeeModalComponent', () => {
     await component.onSubmit();
 
     expect(toastServiceMock.presentErrorToast).toHaveBeenCalledWith('Duplicate tee.');
+  });
+
+  it('resets state on dismiss', () => {
+    component.teeSubmitCount = 2;
+    component.teeForm.patchValue({ teeName: 'Blue' });
+
+    component.onDidDismiss();
+
+    expect(component.teeSubmitCount).toBe(0);
+    expect(component.teeForm.get('teeName')?.value).toBeNull();
   });
 });
