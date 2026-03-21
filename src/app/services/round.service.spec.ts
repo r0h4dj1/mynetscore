@@ -2,6 +2,7 @@ import { Injector, runInInjectionContext } from '@angular/core';
 import { RoundService } from './round.service';
 import { db } from '../database/db';
 import { WhsService } from './whs.service';
+import { ROUND_LIMITS } from '../constants/whs.constants';
 
 describe('RoundService', () => {
   let service: RoundService;
@@ -106,24 +107,28 @@ describe('RoundService', () => {
       expect(round2?.differential).toBe(9.5);
     });
 
-    it('should throw an error if the gross score is less than 20', async () => {
+    it('should throw an error if the gross score is less than the allowed minimum', async () => {
       await expect(
         service.addRound({
           teeId: 'any-tee',
           date: new Date().toISOString(),
-          grossScore: 19,
+          grossScore: ROUND_LIMITS.MIN_GROSS_SCORE - 1,
         }),
-      ).rejects.toThrow(/Gross score must be between 20 and 300/);
+      ).rejects.toThrow(
+        new RegExp(`Gross score must be between ${ROUND_LIMITS.MIN_GROSS_SCORE} and ${ROUND_LIMITS.MAX_GROSS_SCORE}`),
+      );
     });
 
-    it('should throw an error if the gross score is greater than 300', async () => {
+    it('should throw an error if the gross score is greater than the allowed maximum', async () => {
       await expect(
         service.addRound({
           teeId: 'any-tee',
           date: new Date().toISOString(),
-          grossScore: 301,
+          grossScore: ROUND_LIMITS.MAX_GROSS_SCORE + 1,
         }),
-      ).rejects.toThrow(/Gross score must be between 20 and 300/);
+      ).rejects.toThrow(
+        new RegExp(`Gross score must be between ${ROUND_LIMITS.MIN_GROSS_SCORE} and ${ROUND_LIMITS.MAX_GROSS_SCORE}`),
+      );
     });
 
     it('should throw an error if the referenced tee does not exist', async () => {
@@ -157,6 +162,32 @@ describe('RoundService', () => {
           grossScore: 85,
         }),
       ).rejects.toThrow(/Invalid tee slope/);
+    });
+
+    it('finds a duplicate round by tee and date', async () => {
+      await db.rounds.bulkAdd([
+        {
+          id: 'round-1',
+          teeId: 'tee-1',
+          date: '2026-03-10',
+          grossScore: 84,
+          differential: 9.4,
+        },
+        {
+          id: 'round-2',
+          teeId: 'tee-1',
+          date: '2026-03-11',
+          grossScore: 86,
+          differential: 11.2,
+        },
+      ]);
+
+      await expect(service.findDuplicateRound('tee-1', '2026-03-10')).resolves.toMatchObject({
+        id: 'round-1',
+        teeId: 'tee-1',
+        date: '2026-03-10',
+      });
+      await expect(service.findDuplicateRound('tee-1', '2026-03-12')).resolves.toBeUndefined();
     });
   });
 });

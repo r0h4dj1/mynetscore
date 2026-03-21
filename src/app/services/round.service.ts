@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { db, Round } from '../database/db';
 import { WhsService } from './whs.service';
-import { WHS_LIMITS } from '../constants/whs.constants';
+import { ROUND_LIMITS, WHS_LIMITS } from '../constants/whs.constants';
 
 /**
  * Service for managing golf rounds.
@@ -19,8 +19,10 @@ export class RoundService {
    * @returns A promise that resolves to the new round's ID.
    */
   async addRound(round: Omit<Round, 'id' | 'differential'>): Promise<string> {
-    if (round.grossScore < 20 || round.grossScore > 300) {
-      throw new Error('Gross score must be between 20 and 300.');
+    if (round.grossScore < ROUND_LIMITS.MIN_GROSS_SCORE || round.grossScore > ROUND_LIMITS.MAX_GROSS_SCORE) {
+      throw new Error(
+        `Gross score must be between ${ROUND_LIMITS.MIN_GROSS_SCORE} and ${ROUND_LIMITS.MAX_GROSS_SCORE}.`,
+      );
     }
 
     return await db.transaction('rw', db.tees, db.rounds, async () => {
@@ -47,5 +49,20 @@ export class RoundService {
       await db.rounds.add(newRound);
       return id;
     });
+  }
+
+  /**
+   * Finds an existing round recorded against the same tee and date.
+   *
+   * @param teeId - The tee identifier.
+   * @param date - The round date.
+   * @returns The first matching round, if one exists.
+   */
+  async findDuplicateRound(teeId: string, date: string): Promise<Round | undefined> {
+    return db.rounds
+      .where('teeId')
+      .equals(teeId)
+      .and((round) => round.date === date)
+      .first();
   }
 }

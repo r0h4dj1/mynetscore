@@ -2,17 +2,13 @@ import { TestBed } from '@angular/core/testing';
 import { CoursesPage } from './courses.component';
 import { CourseService } from '../../services/course.service';
 import { ToastService } from '../../services/toast.service';
-import { ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { MockInstance } from 'vitest';
-import { IonModal } from '@ionic/angular/standalone';
 
 describe('CoursesPage', () => {
   let component: CoursesPage;
   let courseServiceMock: {
     getCoursesWithTeeCounts: MockInstance;
-    addCourse: MockInstance;
-    addTee: MockInstance;
   };
   let toastServiceMock: {
     presentErrorToast: MockInstance;
@@ -21,8 +17,6 @@ describe('CoursesPage', () => {
   beforeEach(async () => {
     courseServiceMock = {
       getCoursesWithTeeCounts: vi.fn().mockResolvedValue([]),
-      addCourse: vi.fn(),
-      addTee: vi.fn(),
     };
 
     toastServiceMock = {
@@ -30,7 +24,7 @@ describe('CoursesPage', () => {
     };
 
     await TestBed.configureTestingModule({
-      imports: [CoursesPage, ReactiveFormsModule],
+      imports: [CoursesPage],
       providers: [
         { provide: CourseService, useValue: courseServiceMock },
         { provide: ToastService, useValue: toastServiceMock },
@@ -43,12 +37,6 @@ describe('CoursesPage', () => {
 
     const fixture = TestBed.createComponent(CoursesPage);
     component = fixture.componentInstance;
-
-    // Mock the ChangeDetectorRef to avoid issues when calling markForCheck
-    Object.defineProperty(component, 'cdr', {
-      value: { markForCheck: vi.fn() },
-      writable: true,
-    });
   });
 
   it('should be created', () => {
@@ -70,77 +58,11 @@ describe('CoursesPage', () => {
     expect(component.courses[2].name).toBe('Zebra Course');
   });
 
-  it('should verify the bottom sheet toggles correctly on successful add', async () => {
-    component.courseForm.setValue({
-      courseName: 'Test Course',
-      teeName: 'Test Tee',
-      rating: 72,
-      slope: 113,
-      par: 72,
-    });
+  it('reloads the list when the modal reports a saved course', async () => {
+    const loadSpy = vi.spyOn(component, 'loadCourses').mockResolvedValue();
 
-    courseServiceMock.addCourse.mockResolvedValue('test-course-id');
-    courseServiceMock.addTee.mockResolvedValue('test-tee-id');
+    await component.onCourseAdded();
 
-    const dismissMock = vi.fn();
-    component.modal = { dismiss: dismissMock } as unknown as IonModal;
-
-    await component.onAddCourseSubmit();
-
-    expect(courseServiceMock.addCourse).toHaveBeenCalledWith('Test Course');
-    expect(courseServiceMock.addTee).toHaveBeenCalledWith({
-      courseId: 'test-course-id',
-      name: 'Test Tee',
-      rating: 72,
-      slope: 113,
-      par: 72,
-    });
-    expect(dismissMock).toHaveBeenCalled();
-    expect(component.courseForm.value).toEqual({
-      courseName: null,
-      teeName: null,
-      rating: null,
-      slope: null,
-      par: null,
-    });
-  });
-
-  it('should increment addCourseSubmitCount when form is submitted', async () => {
-    expect(component.addCourseSubmitCount).toBe(0);
-
-    await component.onAddCourseSubmit();
-
-    expect(component.addCourseSubmitCount).toBe(1);
-    expect(toastServiceMock.presentErrorToast).toHaveBeenCalledWith(
-      'Please ensure all fields are correctly filled out.',
-    );
-  });
-
-  it('should reset addCourseSubmitCount when modal is dismissed', () => {
-    component.addCourseSubmitCount = 5;
-    component.onAddCourseModalDismiss();
-    expect(component.addCourseSubmitCount).toBe(0);
-  });
-
-  it('should reset addCourseSubmitCount and form on successful submission', async () => {
-    component.courseForm.setValue({
-      courseName: 'Test Course',
-      teeName: 'Test Tee',
-      rating: 72,
-      slope: 113,
-      par: 72,
-    });
-    component.addCourseSubmitCount = 1;
-
-    courseServiceMock.addCourse.mockResolvedValue('test-course-id');
-    courseServiceMock.addTee.mockResolvedValue('test-tee-id');
-    const dismissMock = vi.fn();
-    component.modal = { dismiss: dismissMock } as unknown as IonModal;
-
-    await component.onAddCourseSubmit();
-
-    expect(component.addCourseSubmitCount).toBe(0);
-    expect(courseServiceMock.addCourse).toHaveBeenCalledWith('Test Course');
-    expect(dismissMock).toHaveBeenCalled();
+    expect(loadSpy).toHaveBeenCalled();
   });
 });
