@@ -1,4 +1,4 @@
-<div class="relative flex flex-col h-full bg-true-obsidian">
+<div class="relative flex flex-col h-full">
   <header class="flex items-center justify-between px-4 py-3 pt-10 border-b border-borders shrink-0">
     <div class="flex items-center min-w-0">
       <a
@@ -12,167 +12,156 @@
     </div>
   </header>
 
-  <main class="flex-1 overflow-y-auto px-4 py-6">
-    <form [formGroup]="roundForm" (ngSubmit)="onSubmit()" class="flex flex-col min-h-full">
-      <div class="flex flex-col gap-6">
-        <section>
-          <div class="flex items-center justify-between mb-2">
-            <label class="block text-xs font-medium text-primary-font" for="courseId">Course</label>
+  <main class="flex-1 overflow-y-auto">
+    <div class="px-4 py-6 h-full">
+      <form [formGroup]="roundForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-8">
+        <div class="flex flex-col gap-5">
+          <section>
+            <div class="flex items-center justify-between mb-2">
+              <label class="block text-xs font-light text-secondary-font" for="courseId">Course</label>
+              <button
+                type="button"
+                class="bg-transparent border-none p-0 text-xs font-light text-primary-light active:opacity-80"
+                (click)="openAddCourseModal()"
+              >
+                + Add new course
+              </button>
+            </div>
+
+            <div class="relative">
+              <select
+                id="courseId"
+                formControlName="courseId"
+                class="w-full appearance-none bg-surface border border-borders rounded-xl px-4 py-3 pr-12 text-base text-primary-font focus:outline-none focus:border-primary-light box-border"
+                [class.text-secondary-font]="!roundForm.controls.courseId.value"
+                [appValidationStatus]="submitCount"
+                (change)="onCourseChanged($any($event.target).value)"
+              >
+                <option value="">Select a course...</option>
+                @for (course of courses; track course.id) {
+                  <option [value]="course.id">{{ course.name }}</option>
+                }
+              </select>
+              <ion-icon
+                name="chevron-down"
+                class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-lg"
+                color="base-icon"
+              ></ion-icon>
+            </div>
+          </section>
+
+          <section>
+            <div class="flex items-center justify-between mb-2">
+              <label class="block text-xs font-light text-secondary-font" for="teeId">Tee</label>
+              <button
+                type="button"
+                class="bg-transparent border-none p-0 text-xs font-light active:opacity-80"
+                [class.text-primary-light]="!isAddTeeDisabled"
+                [class.text-borders]="isAddTeeDisabled"
+                [disabled]="isAddTeeDisabled"
+                (click)="openAddTeeModal()"
+              >
+                + Add new tee
+              </button>
+            </div>
+
+            <div class="relative">
+              <select
+                id="teeId"
+                formControlName="teeId"
+                class="w-full appearance-none border border-borders rounded-xl px-4 py-3 pr-12 text-base text-primary-font focus:outline-none focus:border-primary-light box-border"
+                [class.bg-surface]="!roundForm.controls.teeId.disabled"
+                [class.bg-background]="roundForm.controls.teeId.disabled"
+                [class.text-secondary-font]="!roundForm.controls.teeId.value"
+                [class.opacity-50]="roundForm.controls.teeId.disabled"
+                [class.cursor-not-allowed]="roundForm.controls.teeId.disabled"
+                [appValidationStatus]="submitCount"
+              >
+                <option value="">Select a tee...</option>
+                @for (tee of tees; track tee.id) {
+                  <option [value]="tee.id">{{ tee.name }} - {{ tee.rating }} / {{ tee.slope }}</option>
+                }
+              </select>
+              <ion-icon
+                name="chevron-down"
+                class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-lg"
+                [class.text-borders]="roundForm.controls.teeId.disabled"
+                [class.text-secondary-font]="!roundForm.controls.teeId.disabled"
+              ></ion-icon>
+            </div>
+          </section>
+
+          <div class="h-px bg-borders"></div>
+
+          <section>
+            <label class="block text-xs font-light text-secondary-font mb-2" for="date">Date played</label>
             <button
               type="button"
-              class="bg-transparent border-none p-0 text-xs font-medium text-primary active:opacity-80"
-              (click)="openAddCourseModal()"
+              class="relative w-full bg-surface border rounded-xl px-4 py-3 pr-12 text-left text-base text-primary-font focus:outline-none focus:border-primary-light box-border"
+              [class.border-danger]="shouldShowError('date')"
+              [class.border-borders]="!shouldShowError('date')"
+              (click)="openDatePicker()"
             >
-              + Add new course
+              <span id="date" class="block w-full">
+                {{ formattedDateLabel }}
+              </span>
+              <ion-icon
+                name="calendar-clear"
+                class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-lg"
+                color="base-icon"
+              ></ion-icon>
             </button>
-          </div>
+          </section>
 
-          <div
-            class="relative rounded-xl border bg-surface"
-            [class.border-danger]="shouldShowError('courseId')"
-            [class.border-borders]="!shouldShowError('courseId')"
-          >
-            <select
-              id="courseId"
-              formControlName="courseId"
-              class="w-full appearance-none bg-transparent border-none rounded-xl px-4 py-4 pr-12 text-base text-primary-font focus:outline-none"
-              [class.text-secondary-font]="!roundForm.controls.courseId.value"
-              (change)="onCourseChanged($any($event.target).value)"
-            >
-              <option value="">Select a course...</option>
-              @for (course of courses; track course.id) {
-                <option [value]="course.id">{{ course.name }}</option>
-              }
-            </select>
-            <ion-icon
-              name="chevron-down"
-              class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-lg"
-              color="base-icon"
-            ></ion-icon>
-          </div>
-        </section>
+          <section>
+            <label class="block text-xs font-light text-secondary-font mb-2" for="grossScore">Gross score</label>
+            <input
+              id="grossScore"
+              formControlName="grossScore"
+              type="number"
+              inputmode="numeric"
+              [min]="minGrossScore"
+              [max]="maxGrossScore"
+              class="w-full bg-surface border border-borders rounded-xl px-4 py-3 text-base text-primary-font focus:outline-none focus:border-primary-light box-border"
+              [appValidationStatus]="submitCount"
+            />
+          </section>
+        </div>
 
-        <section>
-          <div class="flex items-center justify-between mb-2">
-            <label class="block text-xs font-medium text-primary-font" for="teeId">Tee</label>
-            <button
-              type="button"
-              class="bg-transparent border-none p-0 text-xs font-medium active:opacity-80"
-              [class.text-primary]="!isAddTeeDisabled"
-              [class.text-secondary-font]="isAddTeeDisabled"
-              [disabled]="isAddTeeDisabled"
-              (click)="openAddTeeModal()"
-            >
-              + Add new tee
-            </button>
-          </div>
-
-          <div
-            class="relative rounded-xl border bg-surface"
-            [class.opacity-50]="roundForm.controls.teeId.disabled"
-            [class.border-danger]="shouldShowError('teeId')"
-            [class.border-borders]="!shouldShowError('teeId')"
-          >
-            <select
-              id="teeId"
-              formControlName="teeId"
-              class="w-full appearance-none bg-transparent border-none rounded-xl px-4 py-4 pr-12 text-base text-primary-font focus:outline-none"
-              [class.text-secondary-font]="!roundForm.controls.teeId.value"
-            >
-              <option value="">Select a tee...</option>
-              @for (tee of tees; track tee.id) {
-                <option [value]="tee.id">{{ tee.name }} - {{ tee.rating }} / {{ tee.slope }}</option>
-              }
-            </select>
-            <ion-icon
-              name="chevron-down"
-              class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-lg"
-              color="base-icon"
-            ></ion-icon>
-          </div>
-        </section>
-
-        <div class="h-px bg-borders my-1"></div>
-
-        <section>
-          <label class="block text-xs font-medium text-primary-font mb-2" for="date">Date played</label>
+        <div class="pb-6">
           <button
-            type="button"
-            class="relative rounded-xl border bg-surface"
-            [class.border-danger]="shouldShowError('date')"
-            [class.border-borders]="!shouldShowError('date')"
-            (click)="openDatePicker()"
+            type="submit"
+            class="w-full h-14 rounded-lg font-medium text-lg border-none outline-none active:scale-[0.98] transition-transform flex items-center justify-center"
+            [class.bg-primary]="roundForm.valid && !isSaving"
+            [class.text-true-obsidian]="roundForm.valid && !isSaving"
+            [class.bg-borders]="!roundForm.valid || isSaving"
+            [class.text-secondary-font]="!roundForm.valid || isSaving"
+            [disabled]="isSaving"
           >
-            <span id="date" class="block w-full px-4 py-4 pr-12 text-left text-base text-primary-font">
-              {{ formattedDateLabel }}
-            </span>
-            <ion-icon
-              name="calendar"
-              class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-lg"
-              color="base-icon"
-            ></ion-icon>
+            {{ isSaving ? 'Saving...' : 'Save round' }}
           </button>
-        </section>
 
-        <section>
-          <label class="block text-xs font-medium text-primary-font mb-2" for="grossScore">Gross score</label>
-          <input
-            id="grossScore"
-            formControlName="grossScore"
-            type="number"
-            inputmode="numeric"
-            [min]="minGrossScore"
-            [max]="maxGrossScore"
-            class="w-full bg-surface border rounded-xl px-4 py-4 text-base text-primary-font focus:outline-none box-border"
-            [class.border-danger]="shouldShowError('grossScore')"
-            [class.border-borders]="!shouldShowError('grossScore')"
-          />
-        </section>
-      </div>
-
-      <div class="mt-auto pt-8 pb-6">
-        <button
-          type="submit"
-          class="w-full flex items-center justify-center rounded-2xl border-none px-4 py-4 text-base font-semibold transition-transform active:scale-[0.98]"
-          [class.bg-primary]="roundForm.valid && !isSaving"
-          [class.text-true-obsidian]="roundForm.valid && !isSaving"
-          [class.bg-borders]="!roundForm.valid || isSaving"
-          [class.text-primary-font]="!roundForm.valid || isSaving"
-          [disabled]="isSaving"
-        >
-          {{ isSaving ? 'Saving...' : 'Save round' }}
-        </button>
-
-        @if (saveHelperText) {
-          <p class="mt-3 mb-0 text-center text-xs text-secondary-font">{{ saveHelperText }}</p>
-        }
-      </div>
-    </form>
+          @if (saveHelperText) {
+            <p class="mt-3 mb-0 text-center text-xs font-light text-secondary-font">{{ saveHelperText }}</p>
+          }
+        </div>
+      </form>
+    </div>
   </main>
 
   <app-add-course-modal (saved)="onCourseCreated($event)"></app-add-course-modal>
   <app-add-tee-modal [courseId]="selectedCourseId || null" (saved)="onTeeCreated($event)"></app-add-tee-modal>
 
   @if (showDatePicker) {
-    <div class="absolute inset-0 z-20 flex items-end justify-center bg-black/60 px-4 pb-8">
-      <div class="w-full max-w-md overflow-hidden rounded-3xl border border-borders bg-surface shadow-2xl">
-        <div class="flex items-center justify-between border-b border-borders px-6 py-4">
-          <h2 class="m-0 text-lg font-semibold text-primary-font">Select date</h2>
-          <button
-            type="button"
-            class="border-none bg-transparent p-0 text-sm font-medium text-primary-font"
-            (click)="closeDatePicker()"
-          >
-            Cancel
-          </button>
-        </div>
-
+    <div class="absolute inset-0 z-20 flex items-end justify-center bg-black/60">
+      <div class="w-full">
         <ion-datetime
           [value]="roundForm.controls.date.value"
           presentation="date"
           [max]="todayIsoDate"
           preferWheel="false"
           showDefaultButtons="false"
+          class="w-full"
           (ionChange)="onDateSelected($event)"
         ></ion-datetime>
       </div>
@@ -180,28 +169,31 @@
   }
 
   @if (showDuplicateConfirmation) {
-    <div class="absolute inset-0 z-20 flex items-end justify-center bg-black/60 px-4 pb-8">
-      <div class="w-full max-w-md overflow-hidden rounded-3xl border border-borders bg-surface shadow-2xl">
-        <div class="px-6 py-6 text-center">
-          <h2 class="m-0 text-xl font-semibold text-primary-font">Duplicate round?</h2>
-          <p class="mt-3 mb-0 text-sm leading-6 text-secondary-font">{{ duplicateSummary }}</p>
-          <p class="mt-3 mb-0 text-sm font-medium text-primary-font">Log another round anyway?</p>
+    <div class="absolute inset-0 z-20 flex items-end justify-center bg-black/60 px-4 pb-6">
+      <div class="w-full max-w-md overflow-hidden rounded-[28px] border border-borders bg-surface">
+        <div class="px-4 pt-6 pb-4 border-b border-borders">
+          <h2 class="m-0 text-2xl font-medium text-primary-font">Duplicate round?</h2>
         </div>
 
-        <div class="grid grid-cols-2 border-t border-borders">
+        <div class="px-4 py-6">
+          <p class="m-0 text-sm leading-6 font-light text-secondary-font">{{ duplicateSummary }}</p>
+          <p class="mt-4 mb-0 text-sm font-light text-secondary-font">Log another round anyway?</p>
+        </div>
+
+        <div class="px-4 pb-4 flex flex-col gap-3">
           <button
             type="button"
-            class="border-none bg-transparent px-4 py-4 text-base font-medium text-primary-font"
-            (click)="cancelDuplicateConfirmation()"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            class="border-none border-l border-borders bg-transparent px-4 py-4 text-base font-semibold text-primary"
+            class="w-full h-14 rounded-lg font-medium text-lg bg-primary text-true-obsidian border-none outline-none active:scale-[0.98] transition-transform flex items-center justify-center"
             (click)="confirmDuplicateSave()"
           >
             Log anyway
+          </button>
+          <button
+            type="button"
+            class="w-full h-14 rounded-lg font-medium text-lg bg-surface text-primary-font border border-borders outline-none active:scale-[0.98] transition-transform flex items-center justify-center"
+            (click)="cancelDuplicateConfirmation()"
+          >
+            Cancel
           </button>
         </div>
       </div>

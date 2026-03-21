@@ -4,7 +4,7 @@ import { FormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Valida
 import { Router, RouterLink } from '@angular/router';
 import { IonDatetime, IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { calendar, chevronBack, chevronDown } from 'ionicons/icons';
+import { calendarClear, chevronBack, chevronDown } from 'ionicons/icons';
 import {
   AddCourseModalComponent,
   AddCourseModalResult,
@@ -16,6 +16,7 @@ import { CourseService } from '../../services/course.service';
 import { HandicapStateService } from '../../services/handicap-state.service';
 import { RoundService } from '../../services/round.service';
 import { ToastService } from '../../services/toast.service';
+import { ValidationStatusDirective } from '../../directives/validation-status.directive';
 
 interface RoundFormValue {
   courseId: string;
@@ -45,6 +46,7 @@ interface PendingRoundPayload {
     IonDatetime,
     AddCourseModalComponent,
     AddTeeModalComponent,
+    ValidationStatusDirective,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -90,7 +92,7 @@ export class AddRoundPage {
 
   constructor() {
     addIcons({
-      calendar,
+      calendarClear,
       chevronBack,
       chevronDown,
     });
