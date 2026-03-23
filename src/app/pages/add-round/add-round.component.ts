@@ -2,9 +2,8 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ViewChild, injec
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { IonDatetime, IonIcon } from '@ionic/angular/standalone';
-import { addIcons } from 'ionicons';
-import { calendarClear, chevronBack, chevronDown } from 'ionicons/icons';
+import { IonDatetime } from '@ionic/angular/standalone';
+import { NgIcon } from '@ng-icons/core';
 import {
   AddCourseModalComponent,
   AddCourseModalResult,
@@ -42,7 +41,7 @@ interface PendingRoundPayload {
     CommonModule,
     ReactiveFormsModule,
     RouterLink,
-    IonIcon,
+    NgIcon,
     IonDatetime,
     AddCourseModalComponent,
     AddTeeModalComponent,
@@ -89,14 +88,6 @@ export class AddRoundPage {
   showDuplicateConfirmation = false;
   duplicateSummary = '';
   private pendingRoundPayload: PendingRoundPayload | null = null;
-
-  constructor() {
-    addIcons({
-      calendarClear,
-      chevronBack,
-      chevronDown,
-    });
-  }
 
   /**
    * Ionic lifecycle hook — fires every time the view becomes active.

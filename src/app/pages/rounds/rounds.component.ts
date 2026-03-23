@@ -1,8 +1,6 @@
 import { Component } from '@angular/core';
-import { IonIcon } from '@ionic/angular/standalone';
 import { RouterLink } from '@angular/router';
-import { addIcons } from 'ionicons';
-import { add } from 'ionicons/icons';
+import { NgIcon } from '@ng-icons/core';
 
 /**
  * Component representing the rounds page.
@@ -11,12 +9,6 @@ import { add } from 'ionicons/icons';
   selector: 'app-rounds',
   templateUrl: './rounds.component.html',
   standalone: true,
-  imports: [IonIcon, RouterLink],
+  imports: [NgIcon, RouterLink],
 })
-export class RoundsPage {
-  constructor() {
-    addIcons({
-      add,
-    });
-  }
-}
+export class RoundsPage {}

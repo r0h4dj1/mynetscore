@@ -1,9 +1,8 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewChild, inject } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { IonModal, IonIcon } from '@ionic/angular/standalone';
-import { addIcons } from 'ionicons';
-import { create, chevronBack } from 'ionicons/icons';
+import { IonModal } from '@ionic/angular/standalone';
+import { NgIcon } from '@ng-icons/core';
 import { CourseService } from '../../services/course.service';
 import { ToastService } from '../../services/toast.service';
 import { Course, Tee } from '../../database/db';
@@ -17,7 +16,7 @@ import { WHS_LIMITS } from '../../constants/whs.constants';
   selector: 'app-course-detail',
   templateUrl: './course-detail.component.html',
   standalone: true,
-  imports: [RouterModule, ReactiveFormsModule, IonModal, IonIcon, ValidationStatusDirective],
+  imports: [RouterModule, ReactiveFormsModule, IonModal, NgIcon, ValidationStatusDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CourseDetailPage implements OnInit {
@@ -43,11 +42,6 @@ export class CourseDetailPage implements OnInit {
   teeSubmitCount = 0;
 
   constructor() {
-    addIcons({
-      create,
-      chevronBack,
-    });
-
     this.teeForm = this.fb.group({
       teeName: ['', Validators.required],
       rating: ['', [Validators.required, Validators.min(0.1)]],

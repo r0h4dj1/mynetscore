@@ -1,8 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { IonIcon } from '@ionic/angular/standalone';
-import { addIcons } from 'ionicons';
-import { chevronForward, add } from 'ionicons/icons';
+import { NgIcon } from '@ng-icons/core';
 import { CourseService } from '../../services/course.service';
 import { ToastService } from '../../services/toast.service';
 import { Course } from '../../database/db';
@@ -22,7 +20,7 @@ interface CourseWithTeeCount extends Course {
   selector: 'app-courses',
   templateUrl: './courses.component.html',
   standalone: true,
-  imports: [RouterModule, IonIcon, AddCourseModalComponent],
+  imports: [RouterModule, NgIcon, AddCourseModalComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CoursesPage {
@@ -31,13 +29,6 @@ export class CoursesPage {
   private readonly toastService = inject(ToastService);
 
   courses: CourseWithTeeCount[] = [];
-
-  constructor() {
-    addIcons({
-      chevronForward,
-      add,
-    });
-  }
 
   /**
    * Ionic lifecycle hook — fires every time the view becomes active.

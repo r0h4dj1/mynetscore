@@ -6,7 +6,7 @@
         aria-label="Back to rounds"
         class="mr-2 flex items-center justify-center p-2 -ml-2 rounded-full active:bg-surface transition-colors"
       >
-        <ion-icon name="chevron-back" class="text-2xl" color="base-icon"></ion-icon>
+        <ng-icon name="ionChevronBack" class="text-2xl" [color]="'var(--color-warm-white-dim)'"></ng-icon>
       </a>
       <h1 class="text-xl font-medium text-primary-font truncate m-0">Add round</h1>
     </div>
@@ -42,11 +42,11 @@
                   <option [value]="course.id">{{ course.name }}</option>
                 }
               </select>
-              <ion-icon
-                name="chevron-down"
+              <ng-icon
+                name="ionChevronDown"
                 class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-lg"
-                color="base-icon"
-              ></ion-icon>
+                [color]="'var(--color-warm-white-dim)'"
+              ></ng-icon>
             </div>
           </section>
 
@@ -82,12 +82,11 @@
                   <option [value]="tee.id">{{ tee.name }} - {{ tee.rating }} / {{ tee.slope }}</option>
                 }
               </select>
-              <ion-icon
-                name="chevron-down"
+              <ng-icon
+                name="ionChevronDown"
                 class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-lg"
-                [class.text-borders]="roundForm.controls.teeId.disabled"
-                [class.text-secondary-font]="!roundForm.controls.teeId.disabled"
-              ></ion-icon>
+                [color]="'var(--color-warm-white-dim)'"
+              ></ng-icon>
             </div>
           </section>
 
@@ -105,11 +104,11 @@
               <span id="date" class="block w-full">
                 {{ formattedDateLabel }}
               </span>
-              <ion-icon
-                name="calendar-clear"
+              <ng-icon
+                name="ionCalendarClear"
                 class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-lg"
-                color="base-icon"
-              ></ion-icon>
+                [color]="'var(--color-warm-white-dim)'"
+              ></ng-icon>
             </button>
           </section>
 

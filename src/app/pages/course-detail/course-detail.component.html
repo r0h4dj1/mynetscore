@@ -6,7 +6,7 @@
         aria-label="Back to courses"
         class="mr-2 flex items-center justify-center p-2 -ml-2 rounded-full active:bg-surface transition-colors"
       >
-        <ion-icon name="chevron-back" class="text-2xl" color="base-icon"></ion-icon>
+        <ng-icon name="ionChevronBack" class="text-2xl" [color]="'var(--color-warm-white-dim)'"></ng-icon>
       </a>
       <h1 class="text-xl font-medium text-primary-font truncate m-0">{{ course?.name || 'Course Details' }}</h1>
     </div>
@@ -17,7 +17,7 @@
       aria-label="Edit course"
       class="bg-transparent border-none outline-none p-2 -mr-2 active:bg-surface transition-colors flex items-center justify-center"
     >
-      <ion-icon name="create" class="text-2xl" color="base-icon"></ion-icon>
+      <ng-icon name="ionCreate" class="text-2xl" [color]="'var(--color-warm-white-dim)'"></ng-icon>
     </button>
   </header>
 
