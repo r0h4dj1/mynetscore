@@ -71,10 +71,12 @@ export class BottomSheetModalComponent {
   }
 
   protected onHandleDown(event: PointerEvent): void {
-    this.sheetEl = event.currentTarget as HTMLElement;
+    const handleEl = event.currentTarget as HTMLElement;
+    this.sheetEl = handleEl.closest('[data-testid="sheet"]') as HTMLElement;
+    if (!this.sheetEl) return;
     this.startY = event.clientY;
     this.isDragging = true;
-    this.sheetEl.setPointerCapture(event.pointerId);
+    handleEl.setPointerCapture(event.pointerId);
     this.sheetEl.style.transition = 'none';
   }
 

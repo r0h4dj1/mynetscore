@@ -11,16 +11,19 @@
 
     <div
       data-testid="sheet"
-      class="relative w-full bg-surface rounded-t-2xl pointer-events-auto touch-none will-change-transform max-h-[92dvh] flex flex-col transition-transform duration-300 ease-out"
+      class="relative w-full bg-surface rounded-t-2xl pointer-events-auto will-change-transform max-h-[92dvh] flex flex-col transition-transform duration-300 ease-out"
       [class.translate-y-0]="isVisible()"
       [class.translate-y-full]="!isVisible()"
-      (pointerdown)="onHandleDown($event)"
-      (pointermove)="onHandleMove($event)"
-      (pointerup)="onHandleUp()"
-      (pointercancel)="onHandleUp()"
     >
-      <div class="flex justify-center py-3 cursor-grab">
-        <div class="w-10 h-1 rounded-full bg-borders"></div>
+      <div class="relative flex justify-center py-3">
+        <div
+          class="absolute inset-x-0 -top-4 -bottom-10 cursor-grab touch-none z-10"
+          (pointerdown)="onHandleDown($event)"
+          (pointermove)="onHandleMove($event)"
+          (pointerup)="onHandleUp()"
+          (pointercancel)="onHandleUp()"
+        ></div>
+        <div class="w-10 h-1 rounded-full bg-borders pointer-events-none"></div>
       </div>
 
       <div class="flex-1 overflow-y-auto overscroll-contain">
