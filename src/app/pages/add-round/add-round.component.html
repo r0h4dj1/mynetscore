@@ -148,9 +148,6 @@
     </div>
   </main>
 
-  <app-add-course-modal (saved)="onCourseCreated($event)"></app-add-course-modal>
-  <app-add-tee-modal [courseId]="selectedCourseId || null" (saved)="onTeeCreated($event)"></app-add-tee-modal>
-
   @if (showDatePicker) {
     <div class="absolute inset-0 z-20 flex items-end justify-center bg-black/60">
       <div class="w-full">

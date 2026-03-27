@@ -1,94 +1,83 @@
-<ion-modal
-  [trigger]="trigger"
-  [initialBreakpoint]="1"
-  [breakpoints]="[0, 1]"
-  handleBehavior="cycle"
-  [style.--height]="'auto'"
-  (didDismiss)="onDidDismiss()"
->
-  <ng-template>
-    <div class="flex flex-col bg-surface pb-6">
-      <header class="px-4 pt-6 pb-4 border-b border-borders shrink-0">
-        <h2 class="text-2xl font-medium m-0 text-primary-font">Add course</h2>
-      </header>
+<div class="flex flex-col bg-surface pb-6">
+  <header class="px-4 pt-6 pb-4 border-b border-borders shrink-0">
+    <h2 class="text-2xl font-medium m-0 text-primary-font">Add course</h2>
+  </header>
 
-      <div class="flex-1 px-4 py-6">
-        <form [formGroup]="courseForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-6">
-          <div>
-            <label class="block text-xs font-light text-secondary-font mb-2" for="courseName">Course name</label>
-            <input
-              id="courseName"
-              formControlName="courseName"
-              class="w-full bg-background border border-borders rounded-xl px-4 py-3 text-base text-primary-font focus:outline-none focus:border-primary-light box-border"
-              [appValidationStatus]="addCourseSubmitCount"
-              type="text"
-            />
-          </div>
-
-          <div class="flex items-center gap-4 py-1">
-            <div class="h-px bg-borders flex-1"></div>
-            <span class="text-lg text-primary-font">Add tee</span>
-            <div class="h-px bg-borders flex-1"></div>
-          </div>
-
-          <div>
-            <label class="block text-xs font-light text-secondary-font mb-2" for="teeName">Tee name</label>
-            <input
-              id="teeName"
-              formControlName="teeName"
-              class="w-full bg-background border border-borders rounded-xl px-4 py-3 text-base text-primary-font focus:outline-none focus:border-primary-light box-border"
-              [appValidationStatus]="addCourseSubmitCount"
-              type="text"
-            />
-          </div>
-
-          <div class="flex gap-3">
-            <div class="flex-1 min-w-0">
-              <label class="block text-xs font-light text-secondary-font mb-2" for="rating">Course rating</label>
-              <input
-                id="rating"
-                formControlName="rating"
-                class="w-full bg-background border border-borders rounded-xl px-3 py-3 text-base text-primary-font focus:outline-none focus:border-primary-light box-border"
-                [appValidationStatus]="addCourseSubmitCount"
-                type="number"
-                inputmode="decimal"
-                step="0.1"
-              />
-            </div>
-
-            <div class="flex-1 min-w-0">
-              <label class="block text-xs font-light text-secondary-font mb-2" for="slope">Slope rating</label>
-              <input
-                id="slope"
-                formControlName="slope"
-                class="w-full bg-background border border-borders rounded-xl px-3 py-3 text-base text-primary-font focus:outline-none focus:border-primary-light box-border"
-                [appValidationStatus]="addCourseSubmitCount"
-                type="number"
-                inputmode="numeric"
-              />
-            </div>
-
-            <div class="flex-1 min-w-0">
-              <label class="block text-xs font-light text-secondary-font mb-2" for="par">Par</label>
-              <input
-                id="par"
-                formControlName="par"
-                class="w-full bg-background border border-borders rounded-xl px-3 py-3 text-base text-primary-font focus:outline-none focus:border-primary-light box-border"
-                [appValidationStatus]="addCourseSubmitCount"
-                type="number"
-                inputmode="numeric"
-              />
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            class="flex items-center justify-center gap-1 px-4 py-2 rounded-lg bg-primary text-true-obsidian text-lg font-medium border-none outline-none h-14 active:scale-[0.98] transition-transform"
-          >
-            Save course and tee
-          </button>
-        </form>
+  <div class="flex-1 px-4 py-6">
+    <form [formGroup]="courseForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-6">
+      <div>
+        <label class="block text-xs font-light text-secondary-font mb-2" for="courseName">Course name</label>
+        <input
+          id="courseName"
+          formControlName="courseName"
+          class="w-full bg-background border border-borders rounded-xl px-4 py-3 text-base text-primary-font focus:outline-none focus:border-primary-light box-border"
+          [appValidationStatus]="addCourseSubmitCount"
+          type="text"
+        />
       </div>
-    </div>
-  </ng-template>
-</ion-modal>
+
+      <div class="flex items-center gap-4 py-1">
+        <div class="h-px bg-borders flex-1"></div>
+        <span class="text-lg text-primary-font">Add tee</span>
+        <div class="h-px bg-borders flex-1"></div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-light text-secondary-font mb-2" for="teeName">Tee name</label>
+        <input
+          id="teeName"
+          formControlName="teeName"
+          class="w-full bg-background border border-borders rounded-xl px-4 py-3 text-base text-primary-font focus:outline-none focus:border-primary-light box-border"
+          [appValidationStatus]="addCourseSubmitCount"
+          type="text"
+        />
+      </div>
+
+      <div class="flex gap-3">
+        <div class="flex-1 min-w-0">
+          <label class="block text-xs font-light text-secondary-font mb-2" for="rating">Course rating</label>
+          <input
+            id="rating"
+            formControlName="rating"
+            class="w-full bg-background border border-borders rounded-xl px-3 py-3 text-base text-primary-font focus:outline-none focus:border-primary-light box-border"
+            [appValidationStatus]="addCourseSubmitCount"
+            type="number"
+            inputmode="decimal"
+            step="0.1"
+          />
+        </div>
+
+        <div class="flex-1 min-w-0">
+          <label class="block text-xs font-light text-secondary-font mb-2" for="slope">Slope rating</label>
+          <input
+            id="slope"
+            formControlName="slope"
+            class="w-full bg-background border border-borders rounded-xl px-3 py-3 text-base text-primary-font focus:outline-none focus:border-primary-light box-border"
+            [appValidationStatus]="addCourseSubmitCount"
+            type="number"
+            inputmode="numeric"
+          />
+        </div>
+
+        <div class="flex-1 min-w-0">
+          <label class="block text-xs font-light text-secondary-font mb-2" for="par">Par</label>
+          <input
+            id="par"
+            formControlName="par"
+            class="w-full bg-background border border-borders rounded-xl px-3 py-3 text-base text-primary-font focus:outline-none focus:border-primary-light box-border"
+            [appValidationStatus]="addCourseSubmitCount"
+            type="number"
+            inputmode="numeric"
+          />
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        class="flex items-center justify-center gap-1 px-4 py-2 rounded-lg bg-primary text-true-obsidian text-lg font-medium border-none outline-none h-14 active:scale-[0.98] transition-transform"
+      >
+        Save course and tee
+      </button>
+    </form>
+  </div>
+</div>

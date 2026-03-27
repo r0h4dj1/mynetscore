@@ -1,0 +1,33 @@
+@if (isOpen()) {
+  <div class="fixed inset-0 z-50 flex flex-col justify-end pointer-events-none">
+    <!-- tabindex and keydown.escape satisfy interactive-supports-focus, click-events-have-key-events, and MouseEventWithoutKeyboardEquivalentCheck -->
+    <div
+      data-testid="backdrop"
+      class="absolute inset-0 bg-black/50 pointer-events-auto animate-backdrop-in"
+      tabindex="-1"
+      (click)="onBackdropClick()"
+      (keydown.escape)="onBackdropClick()"
+    ></div>
+
+    <div
+      data-testid="sheet"
+      class="relative w-full bg-surface rounded-t-2xl pointer-events-auto touch-none will-change-transform max-h-[92dvh] flex flex-col transition-transform duration-300 ease-out"
+      [class.translate-y-0]="isVisible()"
+      [class.translate-y-full]="!isVisible()"
+      (pointerdown)="onHandleDown($event)"
+      (pointermove)="onHandleMove($event)"
+      (pointerup)="onHandleUp()"
+      (pointercancel)="onHandleUp()"
+    >
+      <div class="flex justify-center py-3 cursor-grab">
+        <div class="w-10 h-1 rounded-full bg-borders"></div>
+      </div>
+
+      <div class="flex-1 overflow-y-auto overscroll-contain">
+        @if (component(); as comp) {
+          <ng-template [ngComponentOutlet]="comp" [ngComponentOutletInputs]="inputs() ?? undefined"></ng-template>
+        }
+      </div>
+    </div>
+  </div>
+}

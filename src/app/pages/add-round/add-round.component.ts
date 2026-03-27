@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ViewChild, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -11,6 +11,7 @@ import {
 import { AddTeeModalComponent } from '../../components/add-tee-modal/add-tee-modal.component';
 import { Course, Tee } from '../../database/db';
 import { ROUND_LIMITS } from '../../constants/whs.constants';
+import { BottomSheetService } from '../../services/bottom-sheet.service';
 import { CourseService } from '../../services/course.service';
 import { HandicapStateService } from '../../services/handicap-state.service';
 import { RoundService } from '../../services/round.service';
@@ -37,16 +38,7 @@ interface PendingRoundPayload {
   selector: 'app-add-round',
   templateUrl: './add-round.component.html',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    RouterLink,
-    NgIcon,
-    IonDatetime,
-    AddCourseModalComponent,
-    AddTeeModalComponent,
-    ValidationStatusDirective,
-  ],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, NgIcon, IonDatetime, ValidationStatusDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddRoundPage {
@@ -57,9 +49,7 @@ export class AddRoundPage {
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
   private readonly cdr = inject(ChangeDetectorRef);
-
-  @ViewChild(AddCourseModalComponent) addCourseModal?: AddCourseModalComponent;
-  @ViewChild(AddTeeModalComponent) addTeeModal?: AddTeeModalComponent;
+  private readonly bottomSheetService = inject(BottomSheetService);
 
   readonly todayIsoDate = this.getTodayIsoDate();
   readonly minGrossScore = ROUND_LIMITS.MIN_GROSS_SCORE;
@@ -121,7 +111,10 @@ export class AddRoundPage {
    * Opens the inline add-course modal.
    */
   async openAddCourseModal(): Promise<void> {
-    await this.addCourseModal?.present();
+    const result = await this.bottomSheetService.open(AddCourseModalComponent);
+    if (result) {
+      this.onCourseCreated(result as AddCourseModalResult);
+    }
   }
 
   /**
@@ -132,7 +125,12 @@ export class AddRoundPage {
       return;
     }
 
-    await this.addTeeModal?.present();
+    const result = await this.bottomSheetService.open(AddTeeModalComponent, {
+      courseId: this.selectedCourseId,
+    });
+    if (result) {
+      this.onTeeCreated(result as Tee);
+    }
   }
 
   /**
@@ -298,7 +296,7 @@ export class AddRoundPage {
       this.courses = this.sortByName(courses);
       await this.applySelectedCourse(this.selectedCourseId, false);
     } catch {
-      await this.toastService.presentErrorToast('Failed to load courses.');
+      this.toastService.presentErrorToast('Failed to load courses.');
     } finally {
       this.cdr.markForCheck();
     }
@@ -325,7 +323,7 @@ export class AddRoundPage {
       this.tees = [];
       this.roundForm.controls.teeId.reset('');
       this.roundForm.controls.teeId.disable();
-      await this.toastService.presentErrorToast('Failed to load tees.');
+      this.toastService.presentErrorToast('Failed to load tees.');
     } finally {
       this.cdr.markForCheck();
     }
@@ -350,7 +348,7 @@ export class AddRoundPage {
       await this.router.navigateByUrl('/rounds');
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Failed to save round.';
-      await this.toastService.presentErrorToast(message);
+      this.toastService.presentErrorToast(message);
     } finally {
       this.isSaving = false;
       this.cdr.markForCheck();

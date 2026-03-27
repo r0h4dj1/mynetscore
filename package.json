@@ -8,8 +8,8 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test --watch=false",
     "test:watch": "ng test",
-    "lint": "ng lint --fix",
-    "lint:check": "ng lint",
+    "lint": "ng lint",
+    "lint:fix": "ng lint --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },

@@ -1,11 +1,11 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, ViewChild, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { IonModal } from '@ionic/angular/standalone';
 import { Tee } from '../../database/db';
 import { ValidationStatusDirective } from '../../directives/validation-status.directive';
 import { WHS_LIMITS } from '../../constants/whs.constants';
 import { CourseService } from '../../services/course.service';
 import { ToastService } from '../../services/toast.service';
+import { BottomSheetService } from '../../services/bottom-sheet.service';
 
 /**
  * Reusable bottom-sheet for adding a tee to an existing course.
@@ -14,25 +14,17 @@ import { ToastService } from '../../services/toast.service';
   selector: 'app-add-tee-modal',
   templateUrl: './add-tee-modal.component.html',
   standalone: true,
-  imports: [ReactiveFormsModule, IonModal, ValidationStatusDirective],
+  imports: [ReactiveFormsModule, ValidationStatusDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddTeeModalComponent {
   private readonly courseService = inject(CourseService);
   private readonly fb = inject(FormBuilder);
   private readonly toastService = inject(ToastService);
+  private readonly bottomSheetService = inject(BottomSheetService);
 
-  @ViewChild(IonModal) modal!: IonModal;
-
-  /**
-   * The course that newly created tees should belong to.
-   */
+  /** The course ID to add the tee to. */
   @Input() courseId: string | null = null;
-
-  /**
-   * Emits the created tee after a successful save.
-   */
-  @Output() saved = new EventEmitter<Tee>();
 
   readonly teeForm: FormGroup = this.fb.group({
     teeName: ['', Validators.required],
@@ -44,35 +36,18 @@ export class AddTeeModalComponent {
   teeSubmitCount = 0;
 
   /**
-   * Opens the modal programmatically.
-   */
-  async present(): Promise<void> {
-    await this.modal.present();
-  }
-
-  /**
-   * Closes the modal programmatically.
-   *
-   * @param data - Optional dismissal payload.
-   * @param role - Optional Ionic dismissal role.
-   */
-  async dismiss(data?: unknown, role?: string): Promise<void> {
-    await this.modal.dismiss(data, role);
-  }
-
-  /**
    * Persists a new tee for the currently selected course.
    */
   async onSubmit(): Promise<void> {
     this.teeSubmitCount++;
 
     if (!this.courseId) {
-      await this.toastService.presentErrorToast('Select a course before adding a tee.');
+      this.toastService.presentErrorToast('Select a course before adding a tee.');
       return;
     }
 
     if (this.teeForm.invalid) {
-      await this.toastService.presentErrorToast('Please ensure all fields are correctly filled out.');
+      this.toastService.presentErrorToast('Please ensure all fields are correctly filled out.');
       return;
     }
 
@@ -87,32 +62,25 @@ export class AddTeeModalComponent {
         par: Number(par),
       });
 
-      this.saved.emit({
+      const result: Tee = {
         id: teeId,
         courseId: this.courseId,
         name: teeName,
         rating: Number(rating),
         slope: Number(slope),
         par: Number(par),
-      });
+      };
 
       this.resetState();
-      await this.dismiss(undefined, 'save');
+      this.bottomSheetService.dismiss(result);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Failed to add tee.';
-      await this.toastService.presentErrorToast(message);
+      this.toastService.presentErrorToast(message);
     }
-  }
-
-  /**
-   * Resets form state after the modal closes.
-   */
-  onDidDismiss(): void {
-    this.resetState();
   }
 
   private resetState(): void {
     this.teeSubmitCount = 0;
-    this.teeForm.reset();
+    this.teeForm.reset({ teeName: '', rating: '', slope: '', par: '' });
   }
 }

@@ -1,11 +1,11 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, ViewChild, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { IonModal } from '@ionic/angular/standalone';
 import { Course, Tee } from '../../database/db';
 import { ValidationStatusDirective } from '../../directives/validation-status.directive';
 import { WHS_LIMITS } from '../../constants/whs.constants';
 import { CourseService } from '../../services/course.service';
 import { ToastService } from '../../services/toast.service';
+import { BottomSheetService } from '../../services/bottom-sheet.service';
 
 export interface AddCourseModalResult {
   course: Course;
@@ -19,25 +19,14 @@ export interface AddCourseModalResult {
   selector: 'app-add-course-modal',
   templateUrl: './add-course-modal.component.html',
   standalone: true,
-  imports: [ReactiveFormsModule, IonModal, ValidationStatusDirective],
+  imports: [ReactiveFormsModule, ValidationStatusDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddCourseModalComponent {
   private readonly courseService = inject(CourseService);
   private readonly fb = inject(FormBuilder);
   private readonly toastService = inject(ToastService);
-
-  @ViewChild(IonModal) modal!: IonModal;
-
-  /**
-   * Optional DOM trigger ID for declarative modal opening.
-   */
-  @Input() trigger?: string;
-
-  /**
-   * Emits the created course and tee after a successful save.
-   */
-  @Output() saved = new EventEmitter<AddCourseModalResult>();
+  private readonly bottomSheetService = inject(BottomSheetService);
 
   readonly courseForm: FormGroup = this.fb.group({
     courseName: ['', Validators.required],
@@ -50,30 +39,13 @@ export class AddCourseModalComponent {
   addCourseSubmitCount = 0;
 
   /**
-   * Opens the modal programmatically.
-   */
-  async present(): Promise<void> {
-    await this.modal.present();
-  }
-
-  /**
-   * Closes the modal programmatically.
-   *
-   * @param data - Optional dismissal payload.
-   * @param role - Optional Ionic dismissal role.
-   */
-  async dismiss(data?: unknown, role?: string): Promise<void> {
-    await this.modal.dismiss(data, role);
-  }
-
-  /**
    * Persists a new course and tee from the modal form.
    */
   async onSubmit(): Promise<void> {
     this.addCourseSubmitCount++;
 
     if (this.courseForm.invalid) {
-      await this.toastService.presentErrorToast('Please ensure all fields are correctly filled out.');
+      this.toastService.presentErrorToast('Please ensure all fields are correctly filled out.');
       return;
     }
 
@@ -89,7 +61,7 @@ export class AddCourseModalComponent {
         par: Number(par),
       });
 
-      this.saved.emit({
+      const result: AddCourseModalResult = {
         course: { id: courseId, name: courseName },
         tee: {
           id: teeId,
@@ -99,25 +71,18 @@ export class AddCourseModalComponent {
           slope: Number(slope),
           par: Number(par),
         },
-      });
+      };
 
       this.resetState();
-      await this.dismiss(undefined, 'save');
+      this.bottomSheetService.dismiss(result);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Failed to add course and tee.';
-      await this.toastService.presentErrorToast(message);
+      this.toastService.presentErrorToast(message);
     }
-  }
-
-  /**
-   * Resets form state after the modal closes.
-   */
-  onDidDismiss(): void {
-    this.resetState();
   }
 
   private resetState(): void {
     this.addCourseSubmitCount = 0;
-    this.courseForm.reset();
+    this.courseForm.reset({ courseName: '', teeName: '', rating: '', slope: '', par: '' });
   }
 }

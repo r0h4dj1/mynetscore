@@ -3,6 +3,7 @@ import { RouterModule } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
 import { CourseService } from '../../services/course.service';
 import { ToastService } from '../../services/toast.service';
+import { BottomSheetService } from '../../services/bottom-sheet.service';
 import { Course } from '../../database/db';
 import { AddCourseModalComponent } from '../../components/add-course-modal/add-course-modal.component';
 
@@ -20,13 +21,14 @@ interface CourseWithTeeCount extends Course {
   selector: 'app-courses',
   templateUrl: './courses.component.html',
   standalone: true,
-  imports: [RouterModule, NgIcon, AddCourseModalComponent],
+  imports: [RouterModule, NgIcon],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CoursesPage {
   private readonly courseService = inject(CourseService);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly toastService = inject(ToastService);
+  private readonly bottomSheetService = inject(BottomSheetService);
 
   courses: CourseWithTeeCount[] = [];
 
@@ -52,10 +54,9 @@ export class CoursesPage {
     }
   }
 
-  /**
-   * Refreshes the course list after a course is added via the reusable modal.
-   */
-  async onCourseAdded(): Promise<void> {
+  /** Opens the add course modal and reloads courses. */
+  async openAddCourseModal() {
+    await this.bottomSheetService.open(AddCourseModalComponent);
     await this.loadCourses();
   }
 }

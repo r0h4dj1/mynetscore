@@ -2,8 +2,8 @@
   <header class="flex items-center justify-between px-4 py-3 pt-10 border-b border-borders shrink-0">
     <h1 class="text-2xl font-medium m-0">Courses</h1>
     <button
-      id="open-course-modal"
       type="button"
+      (click)="openAddCourseModal()"
       class="flex items-center justify-center gap-1 px-4 py-2 rounded-lg bg-primary text-true-obsidian text-lg font-medium border-none outline-none h-11 active:scale-[0.98] transition-transform"
     >
       <ng-icon name="ionAdd"></ng-icon>
@@ -39,6 +39,4 @@
       }
     </div>
   </main>
-
-  <app-add-course-modal trigger="open-course-modal" (saved)="onCourseAdded()"></app-add-course-modal>
 </div>

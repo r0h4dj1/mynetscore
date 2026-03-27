@@ -1,8 +1,8 @@
 import { TestBed } from '@angular/core/testing';
-import { IonModal } from '@ionic/angular/standalone';
 import { AddCourseModalComponent } from './add-course-modal.component';
 import { CourseService } from '../../services/course.service';
 import { ToastService } from '../../services/toast.service';
+import { BottomSheetService } from '../../services/bottom-sheet.service';
 
 describe('AddCourseModalComponent', () => {
   let component: AddCourseModalComponent;
@@ -12,6 +12,9 @@ describe('AddCourseModalComponent', () => {
   };
   let toastServiceMock: {
     presentErrorToast: ReturnType<typeof vi.fn>;
+  };
+  let bottomSheetServiceMock: {
+    dismiss: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(async () => {
@@ -24,24 +27,28 @@ describe('AddCourseModalComponent', () => {
       presentErrorToast: vi.fn(),
     };
 
+    bottomSheetServiceMock = {
+      dismiss: vi.fn(),
+    };
+
     await TestBed.configureTestingModule({
       imports: [AddCourseModalComponent],
       providers: [
         { provide: CourseService, useValue: courseServiceMock },
         { provide: ToastService, useValue: toastServiceMock },
+        { provide: BottomSheetService, useValue: bottomSheetServiceMock },
       ],
     }).compileComponents();
 
     const fixture = TestBed.createComponent(AddCourseModalComponent);
     component = fixture.componentInstance;
-    component.modal = { dismiss: vi.fn(), present: vi.fn() } as unknown as IonModal;
   });
 
   it('creates the component', () => {
     expect(component).toBeTruthy();
   });
 
-  it('creates a course and tee and emits the saved payload', async () => {
+  it('creates a course and tee and calls dismiss with result', async () => {
     component.courseForm.setValue({
       courseName: 'Royal County Down',
       teeName: 'Blue',
@@ -53,9 +60,6 @@ describe('AddCourseModalComponent', () => {
     courseServiceMock.addCourse.mockResolvedValue('course-1');
     courseServiceMock.addTee.mockResolvedValue('tee-1');
 
-    const savedSpy = vi.fn();
-    component.saved.subscribe(savedSpy);
-
     await component.onSubmit();
 
     expect(courseServiceMock.addCourse).toHaveBeenCalledWith('Royal County Down');
@@ -66,7 +70,7 @@ describe('AddCourseModalComponent', () => {
       slope: 134,
       par: 72,
     });
-    expect(savedSpy).toHaveBeenCalledWith({
+    expect(bottomSheetServiceMock.dismiss).toHaveBeenCalledWith({
       course: { id: 'course-1', name: 'Royal County Down' },
       tee: {
         id: 'tee-1',
@@ -88,14 +92,22 @@ describe('AddCourseModalComponent', () => {
     );
   });
 
-  it('resets state on dismiss', () => {
-    component.addCourseSubmitCount = 2;
-    component.courseForm.patchValue({ courseName: 'Test Course' });
+  it('resets state on successful submission', async () => {
+    component.courseForm.setValue({
+      courseName: 'Royal County Down',
+      teeName: 'Blue',
+      rating: 73.4,
+      slope: 134,
+      par: 72,
+    });
 
-    component.onDidDismiss();
+    courseServiceMock.addCourse.mockResolvedValue('course-1');
+    courseServiceMock.addTee.mockResolvedValue('tee-1');
+
+    await component.onSubmit();
 
     expect(component.addCourseSubmitCount).toBe(0);
-    expect(component.courseForm.get('courseName')?.value).toBeNull();
+    expect(component.courseForm.get('courseName')?.value).toBe('');
   });
 
   it('surfaces service errors', async () => {

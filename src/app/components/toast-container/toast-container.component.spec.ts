@@ -1,4 +1,4 @@
-import { TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { MockInstance } from 'vitest';
 import { ToastContainerComponent } from './toast-container.component';
@@ -12,6 +12,7 @@ describe('ToastContainerComponent', () => {
   };
 
   beforeEach(async () => {
+    vi.useFakeTimers();
     toastServiceMock = {
       toast: signal<{ message: string; duration: number } | null>(null),
       dismiss: vi.fn(),
@@ -25,6 +26,10 @@ describe('ToastContainerComponent', () => {
     fixture = TestBed.createComponent(ToastContainerComponent);
   });
 
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it('creates the component', () => {
     expect(fixture.componentInstance).toBeTruthy();
   });
@@ -35,28 +40,28 @@ describe('ToastContainerComponent', () => {
     expect(el.querySelector('div')).toBeNull();
   });
 
-  it('renders the toast message when signal is set', fakeAsync(() => {
+  it('renders the toast message when signal is set', () => {
     toastServiceMock.toast.set({ message: 'Something went wrong', duration: 3000 });
     fixture.detectChanges();
-    tick();
+    vi.advanceTimersByTime(16);
 
     const el = fixture.nativeElement as HTMLElement;
     const toast = el.querySelector('div');
     expect(toast).toBeTruthy();
     expect(toast?.textContent?.trim()).toBe('Something went wrong');
-  }));
+  });
 
-  it('removes toast element after dismiss transition completes', fakeAsync(() => {
+  it('removes toast element after dismiss transition completes', () => {
     toastServiceMock.toast.set({ message: 'Error', duration: 3000 });
     fixture.detectChanges();
-    tick();
+    vi.advanceTimersByTime(16);
 
     toastServiceMock.toast.set(null);
     fixture.detectChanges();
-    tick(200);
+    vi.advanceTimersByTime(200);
     fixture.detectChanges();
 
     const el = fixture.nativeElement as HTMLElement;
     expect(el.querySelector('div')).toBeNull();
-  }));
+  });
 });
