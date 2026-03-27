@@ -17,6 +17,10 @@ import { HandicapStateService } from '../../services/handicap-state.service';
 import { RoundService } from '../../services/round.service';
 import { ToastService } from '../../services/toast.service';
 import { ValidationStatusDirective } from '../../directives/validation-status.directive';
+import {
+  ListSelectorModalComponent,
+  SelectorItem,
+} from '../../components/list-selector-modal/list-selector-modal.component';
 
 interface RoundFormValue {
   courseId: string;
@@ -105,6 +109,54 @@ export class AddRoundPage {
   async onCourseChanged(courseId: string): Promise<void> {
     this.roundForm.controls.courseId.setValue(courseId);
     await this.applySelectedCourse(courseId);
+  }
+
+  /**
+   * Opens the course list selector modal.
+   */
+  async openCourseSelector(): Promise<void> {
+    const items: SelectorItem[] = this.courses.map((course) => ({
+      id: course.id,
+      label: course.name,
+    }));
+
+    const result = await this.bottomSheetService.open(ListSelectorModalComponent, {
+      title: 'Select a course',
+      items,
+      selectedId: this.selectedCourseId,
+    });
+
+    if (typeof result === 'string') {
+      await this.onCourseChanged(result);
+      this.cdr.markForCheck();
+    }
+  }
+
+  /**
+   * Opens the tee list selector modal.
+   */
+  async openTeeSelector(): Promise<void> {
+    if (this.roundForm.controls.teeId.disabled) {
+      return;
+    }
+
+    const items: SelectorItem[] = this.tees.map((tee) => ({
+      id: tee.id,
+      label: tee.name,
+      subLabel: `${tee.rating} / ${tee.slope}`,
+    }));
+
+    const result = await this.bottomSheetService.open(ListSelectorModalComponent, {
+      title: 'Select a tee',
+      items,
+      selectedId: this.roundForm.controls.teeId.value,
+    });
+
+    if (typeof result === 'string') {
+      this.roundForm.controls.teeId.setValue(result);
+      this.roundForm.controls.teeId.markAsTouched();
+      this.cdr.markForCheck();
+    }
   }
 
   /**
@@ -228,6 +280,30 @@ export class AddRoundPage {
    */
   get selectedCourseId(): string {
     return this.roundForm.controls.courseId.getRawValue();
+  }
+
+  /**
+   * Returns the label of the currently selected course.
+   *
+   * @returns The name of the selected course, or an empty string.
+   */
+  get selectedCourseLabel(): string {
+    const courseId = this.selectedCourseId;
+    if (!courseId) return '';
+    const course = this.courses.find((c) => c.id === courseId);
+    return course ? course.name : '';
+  }
+
+  /**
+   * Returns the label of the currently selected tee.
+   *
+   * @returns The formatted name of the selected tee, or an empty string.
+   */
+  get selectedTeeLabel(): string {
+    const teeId = this.roundForm.controls.teeId.getRawValue();
+    if (!teeId) return '';
+    const tee = this.tees.find((t) => t.id === teeId);
+    return tee ? `${tee.name} - ${tee.rating} / ${tee.slope}` : '';
   }
 
   /**

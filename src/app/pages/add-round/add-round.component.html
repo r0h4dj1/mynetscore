@@ -29,19 +29,20 @@
             </div>
 
             <div class="relative">
-              <select
+              <button
+                type="button"
                 id="courseId"
-                formControlName="courseId"
-                class="w-full appearance-none bg-surface border border-borders rounded-xl px-4 py-3 pr-12 text-base text-primary-font focus:outline-none focus:border-primary-light box-border"
+                class="w-full appearance-none bg-surface border text-left rounded-xl px-4 py-3 pr-12 text-base focus:outline-none focus:border-primary-light box-border transition-colors active:bg-background"
+                [class.text-primary-font]="roundForm.controls.courseId.value"
                 [class.text-secondary-font]="!roundForm.controls.courseId.value"
-                [appValidationStatus]="submitCount"
-                (change)="onCourseChanged($any($event.target).value)"
+                [class.border-danger]="shouldShowError('courseId')"
+                [class.border-borders]="!shouldShowError('courseId')"
+                (click)="openCourseSelector()"
               >
-                <option value="">Select a course...</option>
-                @for (course of courses; track course.id) {
-                  <option [value]="course.id">{{ course.name }}</option>
-                }
-              </select>
+                <span class="block w-full truncate">
+                  {{ selectedCourseLabel || 'Select a course...' }}
+                </span>
+              </button>
               <ng-icon
                 name="ionChevronDown"
                 class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-lg"
@@ -66,22 +67,26 @@
             </div>
 
             <div class="relative">
-              <select
+              <button
+                type="button"
                 id="teeId"
-                formControlName="teeId"
-                class="w-full appearance-none border border-borders rounded-xl px-4 py-3 pr-12 text-base text-primary-font focus:outline-none focus:border-primary-light box-border"
+                class="w-full appearance-none border text-left rounded-xl px-4 py-3 pr-12 text-base focus:outline-none focus:border-primary-light box-border transition-colors"
                 [class.bg-surface]="!roundForm.controls.teeId.disabled"
                 [class.bg-background]="roundForm.controls.teeId.disabled"
+                [class.text-primary-font]="roundForm.controls.teeId.value"
                 [class.text-secondary-font]="!roundForm.controls.teeId.value"
                 [class.opacity-50]="roundForm.controls.teeId.disabled"
                 [class.cursor-not-allowed]="roundForm.controls.teeId.disabled"
-                [appValidationStatus]="submitCount"
+                [class.active:bg-background]="!roundForm.controls.teeId.disabled"
+                [class.border-danger]="shouldShowError('teeId')"
+                [class.border-borders]="!shouldShowError('teeId')"
+                [disabled]="roundForm.controls.teeId.disabled"
+                (click)="openTeeSelector()"
               >
-                <option value="">Select a tee...</option>
-                @for (tee of tees; track tee.id) {
-                  <option [value]="tee.id">{{ tee.name }} - {{ tee.rating }} / {{ tee.slope }}</option>
-                }
-              </select>
+                <span class="block w-full truncate">
+                  {{ selectedTeeLabel || 'Select a tee...' }}
+                </span>
+              </button>
               <ng-icon
                 name="ionChevronDown"
                 class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-lg"

@@ -10,6 +10,7 @@ import {
   ionChevronDown,
   ionCreate,
   ionCalendarClear,
+  ionCheckmark,
 } from '@ng-icons/ionicons';
 
 export const iconsProvider: Provider[] = provideIcons({
@@ -22,4 +23,5 @@ export const iconsProvider: Provider[] = provideIcons({
   ionChevronDown,
   ionCreate,
   ionCalendarClear,
+  ionCheckmark,
 });
