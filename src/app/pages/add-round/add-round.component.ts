@@ -87,7 +87,28 @@ export class AddRoundPage {
    * Ionic lifecycle hook — fires every time the view becomes active.
    */
   ionViewWillEnter(): void {
+    this.resetForm();
     void this.loadCourses();
+  }
+
+  /**
+   * Resets the form and component state to initial values.
+   */
+  private resetForm(): void {
+    this.roundForm.reset({
+      courseId: '',
+      teeId: '',
+      date: this.todayIsoDate,
+      grossScore: '',
+    });
+    this.roundForm.controls.teeId.disable();
+    this.tees = [];
+    this.submitCount = 0;
+    this.isSaving = false;
+    this.showDuplicateConfirmation = false;
+    this.duplicateSummary = '';
+    this.pendingRoundPayload = null;
+    this.dismissedValidationFields.clear();
   }
 
   /**
