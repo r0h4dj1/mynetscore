@@ -5,6 +5,8 @@ import { CourseService } from '../../services/course.service';
 import { HandicapStateService } from '../../services/handicap-state.service';
 import { RoundService } from '../../services/round.service';
 import { ToastService } from '../../services/toast.service';
+import { BottomSheetService } from '../../services/bottom-sheet.service';
+import { iconsProvider } from '../../icons.provider';
 
 describe('AddRoundPage', () => {
   let component: AddRoundPage;
@@ -22,6 +24,9 @@ describe('AddRoundPage', () => {
   };
   let toastServiceMock: {
     presentErrorToast: ReturnType<typeof vi.fn>;
+  };
+  let bottomSheetServiceMock: {
+    open: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(async () => {
@@ -43,14 +48,20 @@ describe('AddRoundPage', () => {
       presentErrorToast: vi.fn(),
     };
 
+    bottomSheetServiceMock = {
+      open: vi.fn(),
+    };
+
     await TestBed.configureTestingModule({
       imports: [AddRoundPage],
       providers: [
         provideRouter([]),
+        ...iconsProvider,
         { provide: CourseService, useValue: courseServiceMock },
         { provide: RoundService, useValue: roundServiceMock },
         { provide: HandicapStateService, useValue: handicapStateServiceMock },
         { provide: ToastService, useValue: toastServiceMock },
+        { provide: BottomSheetService, useValue: bottomSheetServiceMock },
       ],
     }).compileComponents();
 
@@ -254,15 +265,12 @@ describe('AddRoundPage', () => {
     expect(component.roundForm.invalid).toBe(true);
   });
 
-  it('updates the form when a date is selected from ion-datetime', () => {
-    component.onDateSelected(
-      new CustomEvent('ionChange', {
-        detail: { value: '2026-03-18T00:00:00Z' },
-      }),
-    );
+  it('updates the form when a date is selected from the bottom sheet date picker', async () => {
+    bottomSheetServiceMock.open.mockResolvedValue({ date: '2026-03-18' });
+
+    await component.openDatePicker();
 
     expect(component.roundForm.controls.date.value).toBe('2026-03-18');
-    expect(component.showDatePicker).toBe(false);
   });
 
   it('enforces gross score limits', () => {

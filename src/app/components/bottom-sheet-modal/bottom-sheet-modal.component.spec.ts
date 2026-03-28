@@ -103,11 +103,11 @@ describe('BottomSheetModalComponent', () => {
     vi.advanceTimersByTime(16);
     fixture.detectChanges();
 
-    const sheet = fixture.nativeElement.querySelector('[data-testid="sheet"]') as HTMLElement;
-    sheet.setPointerCapture = vi.fn();
+    const handle = fixture.nativeElement.querySelector('[data-testid="sheet"] .cursor-grab') as HTMLElement;
+    handle.setPointerCapture = vi.fn();
 
     const pointerId = 1;
-    sheet.dispatchEvent(
+    handle.dispatchEvent(
       new PointerEvent('pointerdown', {
         clientY: 100,
         pointerId,
@@ -116,7 +116,7 @@ describe('BottomSheetModalComponent', () => {
     );
     fixture.detectChanges();
 
-    sheet.dispatchEvent(
+    handle.dispatchEvent(
       new PointerEvent('pointermove', {
         clientY: 300,
         pointerId,
@@ -125,7 +125,7 @@ describe('BottomSheetModalComponent', () => {
     );
     fixture.detectChanges();
 
-    sheet.dispatchEvent(
+    handle.dispatchEvent(
       new PointerEvent('pointerup', {
         pointerId,
         bubbles: true,
@@ -153,11 +153,11 @@ describe('BottomSheetModalComponent', () => {
     vi.advanceTimersByTime(16);
     fixture.detectChanges();
 
-    const sheet = fixture.nativeElement.querySelector('[data-testid="sheet"]') as HTMLElement;
-    sheet.setPointerCapture = vi.fn();
+    const handle = fixture.nativeElement.querySelector('[data-testid="sheet"] .cursor-grab') as HTMLElement;
+    handle.setPointerCapture = vi.fn();
 
     const pointerId = 1;
-    sheet.dispatchEvent(
+    handle.dispatchEvent(
       new PointerEvent('pointerdown', {
         clientY: 100,
         pointerId,
@@ -166,7 +166,7 @@ describe('BottomSheetModalComponent', () => {
     );
     fixture.detectChanges();
 
-    sheet.dispatchEvent(
+    handle.dispatchEvent(
       new PointerEvent('pointermove', {
         clientY: 180,
         pointerId,
@@ -175,7 +175,7 @@ describe('BottomSheetModalComponent', () => {
     );
     fixture.detectChanges();
 
-    sheet.dispatchEvent(
+    handle.dispatchEvent(
       new PointerEvent('pointerup', {
         pointerId,
         bubbles: true,

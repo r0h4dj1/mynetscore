@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject } from '@
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { IonDatetime } from '@ionic/angular/standalone';
 import { NgIcon } from '@ng-icons/core';
 import {
   AddCourseModalComponent,
@@ -21,6 +20,7 @@ import {
   ListSelectorModalComponent,
   SelectorItem,
 } from '../../components/list-selector-modal/list-selector-modal.component';
+import { DatePickerComponent } from '../../components/date-picker/date-picker.component';
 
 interface RoundFormValue {
   courseId: string;
@@ -42,7 +42,7 @@ interface PendingRoundPayload {
   selector: 'app-add-round',
   templateUrl: './add-round.component.html',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, NgIcon, IonDatetime, ValidationStatusDirective],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, NgIcon, ValidationStatusDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddRoundPage {
@@ -78,7 +78,6 @@ export class AddRoundPage {
   tees: Tee[] = [];
   submitCount = 0;
   isSaving = false;
-  showDatePicker = false;
   showDuplicateConfirmation = false;
   duplicateSummary = '';
   private pendingRoundPayload: PendingRoundPayload | null = null;
@@ -317,7 +316,8 @@ export class AddRoundPage {
       return '';
     }
 
-    return `${this.isToday(value) ? 'Today' : 'Date'} - ${this.formatDate(value)}`;
+    const formattedDate = this.formatDate(value);
+    return this.isToday(value) ? `${formattedDate} (Today)` : formattedDate;
   }
 
   /**
@@ -332,35 +332,16 @@ export class AddRoundPage {
   /**
    * Opens the date picker overlay.
    */
-  openDatePicker(): void {
-    this.showDatePicker = true;
-    this.cdr.markForCheck();
-  }
+  async openDatePicker(): Promise<void> {
+    const result = await this.bottomSheetService.open(DatePickerComponent, {
+      initialDate: this.roundForm.controls.date.getRawValue(),
+    });
 
-  /**
-   * Closes the date picker overlay.
-   */
-  closeDatePicker(): void {
-    this.showDatePicker = false;
-    this.cdr.markForCheck();
-  }
-
-  /**
-   * Applies the chosen date from the Ionic datetime component.
-   *
-   * @param event - The Ionic change event containing the selected date value.
-   */
-  onDateSelected(event: CustomEvent<{ value?: string | string[] | null }>): void {
-    const value = event.detail.value;
-    const selectedValue = Array.isArray(value) ? value[0] : value;
-
-    if (!selectedValue) {
-      return;
+    if (result && typeof result === 'object' && 'date' in result) {
+      this.roundForm.controls.date.setValue((result as { date: string }).date);
+      this.roundForm.controls.date.markAsTouched();
+      this.cdr.markForCheck();
     }
-
-    this.roundForm.controls.date.setValue(selectedValue.slice(0, 10));
-    this.roundForm.controls.date.markAsTouched();
-    this.closeDatePicker();
   }
 
   /**

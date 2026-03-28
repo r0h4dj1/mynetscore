@@ -153,22 +153,6 @@
     </div>
   </main>
 
-  @if (showDatePicker) {
-    <div class="absolute inset-0 z-20 flex items-end justify-center bg-black/60">
-      <div class="w-full">
-        <ion-datetime
-          [value]="roundForm.controls.date.value"
-          presentation="date"
-          [max]="todayIsoDate"
-          preferWheel="false"
-          showDefaultButtons="false"
-          class="w-full"
-          (ionChange)="onDateSelected($event)"
-        ></ion-datetime>
-      </div>
-    </div>
-  }
-
   @if (showDuplicateConfirmation) {
     <div class="absolute inset-0 z-20 flex items-end justify-center bg-black/60 px-4 pb-6">
       <div class="w-full max-w-md overflow-hidden rounded-[28px] border border-borders bg-surface">
