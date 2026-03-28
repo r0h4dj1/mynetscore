@@ -80,6 +80,7 @@ export class AddRoundPage {
   isSaving = false;
   showDuplicateConfirmation = false;
   duplicateSummary = '';
+  private readonly dismissedValidationFields = new Set<keyof RoundFormValue>();
   private pendingRoundPayload: PendingRoundPayload | null = null;
 
   /**
@@ -97,7 +98,21 @@ export class AddRoundPage {
    */
   shouldShowError(controlName: keyof RoundFormValue): boolean {
     const control = this.roundForm.controls[controlName];
-    return !!control && control.invalid && (control.touched || this.submitCount > 0);
+    return (
+      !!control &&
+      control.invalid &&
+      (control.touched || this.submitCount > 0) &&
+      !this.dismissedValidationFields.has(controlName)
+    );
+  }
+
+  /**
+   * Dismisses validation styling for a field after the user taps it.
+   *
+   * @param controlName - The form control to clear from the dismissed set.
+   */
+  dismissValidationError(controlName: keyof RoundFormValue): void {
+    this.dismissedValidationFields.add(controlName);
   }
 
   /**
@@ -108,6 +123,14 @@ export class AddRoundPage {
   async onCourseChanged(courseId: string): Promise<void> {
     this.roundForm.controls.courseId.setValue(courseId);
     await this.applySelectedCourse(courseId);
+  }
+
+  /**
+   * Handles tapping the course selector and dismisses any current validation state.
+   */
+  async onCourseSelectorTap(): Promise<void> {
+    this.dismissValidationError('courseId');
+    await this.openCourseSelector();
   }
 
   /**
@@ -142,7 +165,7 @@ export class AddRoundPage {
     const items: SelectorItem[] = this.tees.map((tee) => ({
       id: tee.id,
       label: tee.name,
-      subLabel: `${tee.rating} / ${tee.slope}`,
+      subLabel: `${tee.rating} · ${tee.slope} · ${tee.par}`,
     }));
 
     const result = await this.bottomSheetService.open(ListSelectorModalComponent, {
@@ -156,6 +179,22 @@ export class AddRoundPage {
       this.roundForm.controls.teeId.markAsTouched();
       this.cdr.markForCheck();
     }
+  }
+
+  /**
+   * Handles tapping the tee selector and dismisses any current validation state.
+   */
+  async onTeeSelectorTap(): Promise<void> {
+    this.dismissValidationError('teeId');
+    await this.openTeeSelector();
+  }
+
+  /**
+   * Handles tapping the date selector and dismisses any current validation state.
+   */
+  async onDateSelectorTap(): Promise<void> {
+    this.dismissValidationError('date');
+    await this.openDatePicker();
   }
 
   /**
@@ -216,6 +255,7 @@ export class AddRoundPage {
    */
   async onSubmit(skipDuplicateCheck = false): Promise<void> {
     this.submitCount++;
+    this.dismissedValidationFields.clear();
     this.roundForm.markAllAsTouched();
 
     if (this.roundForm.invalid || this.isSaving) {
@@ -294,15 +334,27 @@ export class AddRoundPage {
   }
 
   /**
-   * Returns the label of the currently selected tee.
+   * Returns the name of the currently selected tee.
    *
    * @returns The formatted name of the selected tee, or an empty string.
    */
-  get selectedTeeLabel(): string {
+  get selectedTeeName(): string {
     const teeId = this.roundForm.controls.teeId.getRawValue();
     if (!teeId) return '';
     const tee = this.tees.find((t) => t.id === teeId);
-    return tee ? `${tee.name} - ${tee.rating} / ${tee.slope}` : '';
+    return tee ? tee.name : '';
+  }
+
+  /**
+   * Returns formatted tee details (rating, slope, par).
+   *
+   * @returns The tee details string or empty string if no tee is selected.
+   */
+  get selectedTeeDetails(): string {
+    const teeId = this.roundForm.controls.teeId.getRawValue();
+    if (!teeId) return '';
+    const tee = this.tees.find((t) => t.id === teeId);
+    return tee ? `${tee.rating} · ${tee.slope} · ${tee.par}` : '';
   }
 
   /**
