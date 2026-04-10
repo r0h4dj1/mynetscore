@@ -1,0 +1,13 @@
+<div class="relative h-[240px] w-full bg-surface overflow-hidden">
+  <div
+    #scrollContainer
+    class="h-full w-full py-24 overflow-y-auto snap-y snap-mandatory overscroll-contain [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+    (scrollend)="onScrollEnd()"
+  >
+    @for (item of items(); track item.value) {
+      <div class="h-[48px] flex items-center justify-center snap-center text-lg text-content font-normal select-none">
+        {{ item.label }}
+      </div>
+    }
+  </div>
+</div>

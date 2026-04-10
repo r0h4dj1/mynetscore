@@ -1,5 +1,9 @@
-import { Injectable, inject } from '@angular/core';
-import { ToastController } from '@ionic/angular/standalone';
+import { Injectable, signal, type Signal } from '@angular/core';
+
+export interface ToastState {
+  message: string;
+  duration: number;
+}
 
 /**
  * Service for displaying toast notifications.
@@ -8,7 +12,11 @@ import { ToastController } from '@ionic/angular/standalone';
   providedIn: 'root',
 })
 export class ToastService {
-  private readonly toastController = inject(ToastController);
+  private readonly _toast = signal<ToastState | null>(null);
+  private autoDismissTimer: ReturnType<typeof setTimeout> | null = null;
+
+  /** Signal read by the toast container component. */
+  readonly toast: Signal<ToastState | null> = this._toast.asReadonly();
 
   /**
    * Presents an error toast notification from the top of the screen.
@@ -16,13 +24,24 @@ export class ToastService {
    * @param message - The message to display.
    * @param duration - Duration in milliseconds (default: 3000).
    */
-  async presentErrorToast(message: string, duration = 3000) {
-    const toast = await this.toastController.create({
-      message,
-      duration,
-      color: 'danger',
-      position: 'top',
-    });
-    await toast.present();
+  presentErrorToast(message: string, duration = 3000) {
+    this.clearTimer();
+    this._toast.set({ message, duration });
+    this.autoDismissTimer = setTimeout(() => this.dismiss(), duration);
+  }
+
+  /**
+   * Dismisses the current toast.
+   */
+  dismiss() {
+    this.clearTimer();
+    this._toast.set(null);
+  }
+
+  private clearTimer() {
+    if (this.autoDismissTimer !== null) {
+      clearTimeout(this.autoDismissTimer);
+      this.autoDismissTimer = null;
+    }
   }
 }
