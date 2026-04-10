@@ -2,38 +2,42 @@ import { TestBed } from '@angular/core/testing';
 import { CoursesPage } from './courses.component';
 import { CourseService } from '../../services/course.service';
 import { ToastService } from '../../services/toast.service';
-import { ReactiveFormsModule } from '@angular/forms';
+import { BottomSheetService } from '../../services/bottom-sheet.service';
 import { ActivatedRoute } from '@angular/router';
+import { AddCourseModalComponent } from '../../components/add-course-modal/add-course-modal.component';
 import { MockInstance } from 'vitest';
-import { IonModal } from '@ionic/angular/standalone';
 
 describe('CoursesPage', () => {
   let component: CoursesPage;
   let courseServiceMock: {
     getCoursesWithTeeCounts: MockInstance;
-    addCourse: MockInstance;
-    addTee: MockInstance;
   };
   let toastServiceMock: {
     presentErrorToast: MockInstance;
+  };
+  let bottomSheetServiceMock: {
+    open: MockInstance;
   };
 
   beforeEach(async () => {
     courseServiceMock = {
       getCoursesWithTeeCounts: vi.fn().mockResolvedValue([]),
-      addCourse: vi.fn(),
-      addTee: vi.fn(),
     };
 
     toastServiceMock = {
       presentErrorToast: vi.fn(),
     };
 
+    bottomSheetServiceMock = {
+      open: vi.fn().mockResolvedValue(undefined),
+    };
+
     await TestBed.configureTestingModule({
-      imports: [CoursesPage, ReactiveFormsModule],
+      imports: [CoursesPage],
       providers: [
         { provide: CourseService, useValue: courseServiceMock },
         { provide: ToastService, useValue: toastServiceMock },
+        { provide: BottomSheetService, useValue: bottomSheetServiceMock },
         {
           provide: ActivatedRoute,
           useValue: { snapshot: { paramMap: { get: () => '1' } } },
@@ -43,19 +47,9 @@ describe('CoursesPage', () => {
 
     const fixture = TestBed.createComponent(CoursesPage);
     component = fixture.componentInstance;
-
-    // Mock the ChangeDetectorRef to avoid issues when calling markForCheck
-    Object.defineProperty(component, 'cdr', {
-      value: { markForCheck: vi.fn() },
-      writable: true,
-    });
   });
 
-  it('should be created', () => {
-    expect(component).toBeTruthy();
-  });
-
-  it('should verify the list is sorted alphabetically', async () => {
+  it('loads and sorts courses alphabetically when the view enters', async () => {
     courseServiceMock.getCoursesWithTeeCounts.mockResolvedValue([
       { id: '2', name: 'Zebra Course', teeCount: 1 },
       { id: '1', name: 'Apple Course', teeCount: 2 },
@@ -64,83 +58,29 @@ describe('CoursesPage', () => {
 
     await component.loadCourses();
 
-    expect(component.courses.length).toBe(3);
-    expect(component.courses[0].name).toBe('Apple Course');
-    expect(component.courses[1].name).toBe('Banana Course');
-    expect(component.courses[2].name).toBe('Zebra Course');
+    expect(component.courses).toEqual([
+      { id: '1', name: 'Apple Course', teeCount: 2 },
+      { id: '3', name: 'Banana Course', teeCount: 3 },
+      { id: '2', name: 'Zebra Course', teeCount: 1 },
+    ]);
   });
 
-  it('should verify the bottom sheet toggles correctly on successful add', async () => {
-    component.courseForm.setValue({
-      courseName: 'Test Course',
-      teeName: 'Test Tee',
-      rating: 72,
-      slope: 113,
-      par: 72,
-    });
+  it('shows an error toast if loading courses fails', async () => {
+    courseServiceMock.getCoursesWithTeeCounts.mockRejectedValue(new Error('Database error'));
 
-    courseServiceMock.addCourse.mockResolvedValue('test-course-id');
-    courseServiceMock.addTee.mockResolvedValue('test-tee-id');
+    await component.loadCourses();
 
-    const dismissMock = vi.fn();
-    component.modal = { dismiss: dismissMock } as unknown as IonModal;
-
-    await component.onAddCourseSubmit();
-
-    expect(courseServiceMock.addCourse).toHaveBeenCalledWith('Test Course');
-    expect(courseServiceMock.addTee).toHaveBeenCalledWith({
-      courseId: 'test-course-id',
-      name: 'Test Tee',
-      rating: 72,
-      slope: 113,
-      par: 72,
-    });
-    expect(dismissMock).toHaveBeenCalled();
-    expect(component.courseForm.value).toEqual({
-      courseName: null,
-      teeName: null,
-      rating: null,
-      slope: null,
-      par: null,
-    });
+    expect(toastServiceMock.presentErrorToast).toHaveBeenCalledWith('Failed to load courses.');
+    expect(component.courses).toEqual([]);
   });
 
-  it('should increment addCourseSubmitCount when form is submitted', async () => {
-    expect(component.addCourseSubmitCount).toBe(0);
+  it('opens the add course modal and refreshes the course list when closed', async () => {
+    courseServiceMock.getCoursesWithTeeCounts.mockResolvedValue([{ id: '1', name: 'New Course', teeCount: 0 }]);
 
-    await component.onAddCourseSubmit();
+    await component.openAddCourseModal();
 
-    expect(component.addCourseSubmitCount).toBe(1);
-    expect(toastServiceMock.presentErrorToast).toHaveBeenCalledWith(
-      'Please ensure all fields are correctly filled out.',
-    );
-  });
-
-  it('should reset addCourseSubmitCount when modal is dismissed', () => {
-    component.addCourseSubmitCount = 5;
-    component.onAddCourseModalDismiss();
-    expect(component.addCourseSubmitCount).toBe(0);
-  });
-
-  it('should reset addCourseSubmitCount and form on successful submission', async () => {
-    component.courseForm.setValue({
-      courseName: 'Test Course',
-      teeName: 'Test Tee',
-      rating: 72,
-      slope: 113,
-      par: 72,
-    });
-    component.addCourseSubmitCount = 1;
-
-    courseServiceMock.addCourse.mockResolvedValue('test-course-id');
-    courseServiceMock.addTee.mockResolvedValue('test-tee-id');
-    const dismissMock = vi.fn();
-    component.modal = { dismiss: dismissMock } as unknown as IonModal;
-
-    await component.onAddCourseSubmit();
-
-    expect(component.addCourseSubmitCount).toBe(0);
-    expect(courseServiceMock.addCourse).toHaveBeenCalledWith('Test Course');
-    expect(dismissMock).toHaveBeenCalled();
+    expect(bottomSheetServiceMock.open).toHaveBeenCalledWith(AddCourseModalComponent);
+    expect(courseServiceMock.getCoursesWithTeeCounts).toHaveBeenCalled();
+    expect(component.courses).toEqual([{ id: '1', name: 'New Course', teeCount: 0 }]);
   });
 });
