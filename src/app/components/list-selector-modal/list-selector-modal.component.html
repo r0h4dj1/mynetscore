@@ -1,0 +1,38 @@
+<div class="flex flex-col h-full bg-surface">
+  <header class="px-5 py-4 border-b border-borders shrink-0">
+    <h2 class="m-0 text-xl font-medium text-primary-font text-center">{{ title }}</h2>
+  </header>
+
+  <!-- Placeholder for future search bar -->
+  <!-- <div class="px-5 py-3 border-b border-borders shrink-0">
+    ... search input here ...
+  </div> -->
+
+  <div class="flex-1 overflow-y-auto overscroll-contain pb-6">
+    <div class="flex flex-col">
+      @for (item of items; track item.id) {
+        <button
+          type="button"
+          class="flex items-center justify-between w-full px-5 py-4 border-none bg-transparent active:bg-background transition-colors text-left"
+          (click)="selectItem(item.id)"
+        >
+          <div class="flex flex-col mr-4">
+            <span
+              class="text-base font-medium"
+              [class.text-primary-font]="item.id === selectedId"
+              [class.text-secondary-font]="item.id !== selectedId"
+            >
+              {{ item.label }}
+            </span>
+            @if (item.subLabel) {
+              <span class="text-sm text-secondary-font font-light mt-1">{{ item.subLabel }}</span>
+            }
+          </div>
+          @if (item.id === selectedId) {
+            <ng-icon name="ionCheckmark" class="text-xl text-primary-light shrink-0"></ng-icon>
+          }
+        </button>
+      }
+    </div>
+  </div>
+</div>

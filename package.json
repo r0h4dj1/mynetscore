@@ -8,8 +8,8 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test --watch=false",
     "test:watch": "ng test",
-    "lint": "ng lint --fix",
-    "lint:check": "ng lint",
+    "lint": "ng lint",
+    "lint:fix": "ng lint --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
@@ -26,6 +26,8 @@
     "@capacitor/core": "8.1.0",
     "@fontsource-variable/ibm-plex-sans": "5.2.8",
     "@ionic/angular": "8.8.1",
+    "@ng-icons/core": "33.1.0",
+    "@ng-icons/ionicons": "33.1.0",
     "dexie": "4.3.0",
     "rxjs": "7.8.0",
     "tslib": "2.3.0"

@@ -38,8 +38,8 @@ Every component, function, or class should have one, and only one, reason to cha
 ### Unit Testing (Vitest)
 
 - **Pragmatic Coverage:** We aim for a healthy balance, targeting roughly **70% code coverage** for unit tests.
-- Focus unit tests heavily on critical business logic, especially the World Handicap System (WHS) calculation engine (differentials, 8-of-20 logic) and complex state transformations.
-- Do not overdo testing for simple UI rendering or getters/setters where the value of the test is low.
+- Focus unit tests heavily on critical business logic and complex state transformations. Do not overdo testing for simple elements where the value of the test is low.
+- **Test Behavior, Not Implementation:** Focus on testing the public contract and expected outputs, not internal implementation details. Tests that verify behavior (inputs → outputs) remain stable even when refactoring.
 
 ### End-to-End (E2E) Testing (Cypress)
 
