@@ -23,6 +23,37 @@ export class CourseService {
   }
 
   /**
+   * Adds a new course and its initial tee to the database atomically.
+   *
+   * @param courseName - The name of the course to add.
+   * @param teeData - The initial tee data (name, rating, slope, par).
+   * @returns A promise resolving to the created course and tee objects.
+   */
+  async addCourseWithTee(
+    courseName: string,
+    teeData: Omit<Tee, 'id' | 'courseId'>,
+  ): Promise<{ course: Course; tee: Tee }> {
+    return db.transaction('rw', [db.courses, db.tees], async () => {
+      const courseId = crypto.randomUUID();
+      const course: Course = { id: courseId, name: courseName };
+      await db.courses.add(course);
+
+      const teeId = await this.addTee({
+        courseId,
+        ...teeData,
+      });
+
+      const tee: Tee = {
+        id: teeId,
+        courseId,
+        ...teeData,
+      };
+
+      return { course, tee };
+    });
+  }
+
+  /**
    * Retrieves all saved courses from the database.
    *
    * @returns A promise resolving to an array of all courses.

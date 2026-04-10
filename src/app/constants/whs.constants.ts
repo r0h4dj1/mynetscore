@@ -17,3 +17,18 @@ export const WHS_LIMITS = {
    */
   STANDARD_SLOPE: 113,
 } as const;
+
+/**
+ * Shared round-entry score limits.
+ */
+export const ROUND_LIMITS = {
+  /**
+   * Minimum allowable gross score.
+   */
+  MIN_GROSS_SCORE: 20,
+
+  /**
+   * Maximum allowable gross score.
+   */
+  MAX_GROSS_SCORE: 300,
+} as const;

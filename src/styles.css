@@ -41,11 +41,6 @@
 @layer base {
   :root {
     --ion-font-family: var(--font-sans);
-    --ion-color-base-icon: var(--color-warm-white-dim);
-  }
-
-  .ion-color-base-icon {
-    --ion-color-base: var(--ion-color-base-icon);
   }
 
   body {

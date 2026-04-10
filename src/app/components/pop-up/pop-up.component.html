@@ -1,0 +1,30 @@
+<div class="absolute inset-0 z-20 flex items-center justify-center bg-black/60 px-4">
+  <div class="w-full max-w-sm overflow-hidden rounded-[28px] border border-borders bg-surface text-center">
+    <div class="px-6 pt-8 pb-4">
+      <h2 class="m-0 text-xl font-medium text-primary-font">{{ title }}</h2>
+    </div>
+
+    <div class="px-6 pb-6 text-primary-font">
+      <ng-content></ng-content>
+    </div>
+
+    <div class="flex border-t border-borders">
+      @if (secondaryButtonText) {
+        <button
+          type="button"
+          class="flex-1 py-4 text-lg font-medium text-primary-font border-r border-borders outline-none active:bg-borders transition-colors"
+          (click)="secondaryAction.emit()"
+        >
+          {{ secondaryButtonText }}
+        </button>
+      }
+      <button
+        type="button"
+        class="flex-1 py-4 text-lg font-medium text-championship-gold outline-none active:bg-borders transition-colors"
+        (click)="primaryAction.emit()"
+      >
+        {{ primaryButtonText }}
+      </button>
+    </div>
+  </div>
+</div>
