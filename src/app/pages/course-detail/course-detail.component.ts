@@ -1,14 +1,18 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, ViewChild, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { IonModal, IonIcon } from '@ionic/angular/standalone';
-import { addIcons } from 'ionicons';
-import { create, chevronBack } from 'ionicons/icons';
+import { NgIcon } from '@ng-icons/core';
 import { CourseService } from '../../services/course.service';
 import { ToastService } from '../../services/toast.service';
+import { BottomSheetService } from '../../services/bottom-sheet.service';
 import { Course, Tee } from '../../database/db';
 import { ValidationStatusDirective } from '../../directives/validation-status.directive';
 import { WHS_LIMITS } from '../../constants/whs.constants';
+import {
+  EditCourseModalComponent,
+  EditCourseModalResult,
+} from '../../components/edit-course-modal/edit-course-modal.component';
+import { EditTeeModalComponent, EditTeeModalResult } from '../../components/edit-tee-modal/edit-tee-modal.component';
 
 /**
  * Component representing the course detail page.
@@ -17,7 +21,7 @@ import { WHS_LIMITS } from '../../constants/whs.constants';
   selector: 'app-course-detail',
   templateUrl: './course-detail.component.html',
   standalone: true,
-  imports: [RouterModule, ReactiveFormsModule, IonModal, IonIcon, ValidationStatusDirective],
+  imports: [RouterModule, ReactiveFormsModule, NgIcon, ValidationStatusDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CourseDetailPage implements OnInit {
@@ -27,39 +31,17 @@ export class CourseDetailPage implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly toastService = inject(ToastService);
-
-  @ViewChild('editCourseModal') editCourseModal!: IonModal;
-  @ViewChild('editTeeModal') editTeeModal!: IonModal;
+  private readonly bottomSheetService = inject(BottomSheetService);
 
   courseId: string | null = null;
   course: Course | undefined;
   tees: Tee[] = [];
-  editingTeeId: string | null = null;
 
   teeForm: FormGroup;
-  editCourseForm: FormGroup;
-  editTeeForm: FormGroup;
-
   teeSubmitCount = 0;
 
   constructor() {
-    addIcons({
-      create,
-      chevronBack,
-    });
-
     this.teeForm = this.fb.group({
-      teeName: ['', Validators.required],
-      rating: ['', [Validators.required, Validators.min(0.1)]],
-      slope: ['', [Validators.required, Validators.min(WHS_LIMITS.MIN_SLOPE), Validators.max(WHS_LIMITS.MAX_SLOPE)]],
-      par: ['', [Validators.required, Validators.min(1)]],
-    });
-
-    this.editCourseForm = this.fb.group({
-      courseName: ['', Validators.required],
-    });
-
-    this.editTeeForm = this.fb.group({
       teeName: ['', Validators.required],
       rating: ['', [Validators.required, Validators.min(0.1)]],
       slope: ['', [Validators.required, Validators.min(WHS_LIMITS.MIN_SLOPE), Validators.max(WHS_LIMITS.MAX_SLOPE)]],
@@ -136,120 +118,94 @@ export class CourseDetailPage implements OnInit {
   }
 
   /**
-   * Opens the edit course modal and pre-populates current values.
+   * Opens the edit course modal.
    */
   async openEditCourseModal() {
     if (!this.course) return;
 
-    this.editCourseForm.setValue({
-      courseName: this.course.name,
-    });
-    await this.editCourseModal.present();
-  }
+    const result = (await this.bottomSheetService.open(EditCourseModalComponent, {
+      course: this.course,
+    })) as EditCourseModalResult | undefined;
 
-  /**
-   * Opens the edit tee modal and pre-populates current tee values.
-   *
-   * @param tee - The tee selected for editing.
-   */
-  async openEditTeeModal(tee: Tee) {
-    this.editingTeeId = tee.id;
-    this.editTeeForm.setValue({
-      teeName: tee.name,
-      rating: tee.rating,
-      slope: tee.slope,
-      par: tee.par,
-    });
-    await this.editTeeModal.present();
-  }
+    if (!result) return;
 
-  /**
-   * Handles submitting the edit course form.
-   */
-  async onEditCourseSubmit() {
-    if (!this.courseId) return;
-
-    if (this.editCourseForm.invalid) {
-      this.toastService.presentErrorToast('Please ensure all fields are correctly filled out.');
-      return;
+    if (result.action === 'save' && result.payload) {
+      await this.handleCourseSave(result.payload.name);
+    } else if (result.action === 'delete') {
+      await this.handleCourseDelete();
     }
+  }
 
-    const { courseName } = this.editCourseForm.value;
+  private async handleCourseSave(name: string) {
     try {
-      await this.courseService.updateCourse(this.courseId, courseName);
-      await this.editCourseModal.dismiss();
+      await this.courseService.updateCourse(this.courseId!, name);
       await this.loadCourseData();
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : String(error);
-      this.toastService.presentErrorToast(message || 'Failed to update course.');
+      this.toastService.presentErrorToast(this.getErrorMessage(error, 'Failed to update course.'));
     }
   }
 
-  /**
-   * Handles submitting the edit tee form.
-   */
-  async onEditTeeSubmit() {
-    if (!this.editingTeeId) return;
-
-    if (this.editTeeForm.invalid) {
-      this.toastService.presentErrorToast('Please ensure all fields are correctly filled out.');
-      return;
-    }
-
-    const { teeName, rating, slope, par } = this.editTeeForm.value;
+  private async handleCourseDelete() {
     try {
-      await this.courseService.updateTee(this.editingTeeId, teeName, Number(rating), Number(slope), Number(par));
-      await this.editTeeModal.dismiss();
-      this.editingTeeId = null;
-      await this.loadCourseData();
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : String(error);
-      this.toastService.presentErrorToast(message || 'Failed to update tee.');
-    }
-  }
-
-  /**
-   * Deletes a tee.
-   *
-   * @param teeId - The ID of the tee to delete.
-   */
-  async onDeleteTee(teeId: string) {
-    try {
-      await this.courseService.deleteTee(teeId);
-      if (this.editTeeModal) {
-        await this.editTeeModal.dismiss();
-      }
-      this.editingTeeId = null;
-      await this.loadCourseData();
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : String(error);
-      if (message.includes('associated rounds')) {
-        this.toastService.presentErrorToast('This tee has logged rounds and cannot be deleted.');
-      } else {
-        this.toastService.presentErrorToast(message || 'Failed to delete tee.');
-      }
-    }
-  }
-
-  /**
-   * Deletes the current course.
-   */
-  async onDeleteCourse() {
-    if (!this.courseId) return;
-
-    try {
-      await this.courseService.deleteCourse(this.courseId);
-      if (this.editCourseModal) {
-        await this.editCourseModal.dismiss();
-      }
+      await this.courseService.deleteCourse(this.courseId!);
       this.router.navigate(['/courses']);
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : String(error);
-      if (message.includes('associated rounds')) {
-        this.toastService.presentErrorToast('This course has logged rounds and cannot be deleted.');
-      } else {
-        this.toastService.presentErrorToast(message || 'Failed to delete course.');
-      }
+      this.toastService.presentErrorToast(
+        this.getDeleteErrorMessage(
+          error,
+          'Failed to delete course.',
+          'This course has logged rounds and cannot be deleted.',
+        ),
+      );
     }
+  }
+
+  /**
+   * Opens the edit tee modal for the given tee.
+   *
+   * @param tee - The tee to edit.
+   */
+  async openEditTeeModal(tee: Tee) {
+    const result = (await this.bottomSheetService.open(EditTeeModalComponent, {
+      tee: tee,
+    })) as EditTeeModalResult | undefined;
+
+    if (!result) return;
+
+    if (result.action === 'save' && result.payload) {
+      await this.handleTeeSave(tee.id, result.payload);
+    } else if (result.action === 'delete') {
+      await this.handleTeeDelete(tee.id);
+    }
+  }
+
+  private async handleTeeSave(teeId: string, payload: { name: string; rating: number; slope: number; par: number }) {
+    try {
+      await this.courseService.updateTee(teeId, payload.name, payload.rating, payload.slope, payload.par);
+      await this.loadCourseData();
+    } catch (error: unknown) {
+      this.toastService.presentErrorToast(this.getErrorMessage(error, 'Failed to update tee.'));
+    }
+  }
+
+  private async handleTeeDelete(teeId: string) {
+    try {
+      await this.courseService.deleteTee(teeId);
+      await this.loadCourseData();
+    } catch (error: unknown) {
+      this.toastService.presentErrorToast(
+        this.getDeleteErrorMessage(error, 'Failed to delete tee.', 'This tee has logged rounds and cannot be deleted.'),
+      );
+    }
+  }
+
+  private getErrorMessage(error: unknown, fallback: string): string {
+    const message = error instanceof Error ? error.message : String(error);
+    return message || fallback;
+  }
+
+  private getDeleteErrorMessage(error: unknown, fallback: string, roundsMessage: string): string {
+    const message = error instanceof Error ? error.message : String(error);
+    return message.includes('associated rounds') ? roundsMessage : message || fallback;
   }
 }
