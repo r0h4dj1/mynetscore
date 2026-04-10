@@ -1,0 +1,44 @@
+<div class="flex flex-col w-full h-full bg-surface rounded-t-2xl overflow-hidden">
+  <div class="flex justify-between items-center sticky top-0 px-4 py-3 z-20 border-b border-borders/50">
+    <span class="text-content font-medium text-xl">Select date</span>
+    <button
+      type="button"
+      class="text-primary font-medium text-lg py-1 px-2 active:opacity-70 transition-opacity"
+      (click)="confirm()"
+    >
+      Done
+    </button>
+  </div>
+
+  <div class="w-full px-4 pt-2 pb-8">
+    <div class="relative flex w-full gap-2 justify-center">
+      <div
+        class="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[48px] bg-borders/30 pointer-events-none rounded-lg z-10"
+      ></div>
+
+      <app-wheel-column
+        class="flex-1 max-w-[80px]"
+        [items]="days()"
+        [selectedValue]="selectedDay()"
+        (valueChange)="onDayChange($event)"
+      >
+      </app-wheel-column>
+
+      <app-wheel-column
+        class="flex-1 max-w-[120px]"
+        [items]="months()"
+        [selectedValue]="selectedMonth()"
+        (valueChange)="onMonthChange($event)"
+      >
+      </app-wheel-column>
+
+      <app-wheel-column
+        class="flex-1 max-w-[100px]"
+        [items]="years()"
+        [selectedValue]="selectedYear()"
+        (valueChange)="onYearChange($event)"
+      >
+      </app-wheel-column>
+    </div>
+  </div>
+</div>
