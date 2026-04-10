@@ -66,25 +66,11 @@ export class WhsService {
     }
 
     const recentDifferentials = differentials.slice(0, 20);
-    const numRounds = recentDifferentials.length;
-
-    let lowestN: number;
-    let adjustment: number;
-
-    if (numRounds >= 20) {
-      lowestN = 8;
-      adjustment = 0;
-    } else {
-      const entry = this.PROVISIONAL_TABLE[numRounds];
-      lowestN = entry.lowestN;
-      adjustment = entry.adjustment;
-    }
-
-    const sortedDifferentials = [...recentDifferentials].sort((a, b) => a - b);
-    const lowestDifferentials = sortedDifferentials.slice(0, lowestN);
+    const { adjustment } = this.getSelectionRule(recentDifferentials.length);
+    const lowestDifferentials = this.getCountingDifferentials(recentDifferentials);
 
     const sum = lowestDifferentials.reduce((acc, val) => acc + val, 0);
-    let average = sum / lowestN;
+    let average = sum / lowestDifferentials.length;
 
     if (isGolfAustralia) {
       average *= 0.93;
@@ -93,6 +79,23 @@ export class WhsService {
     const index = average + adjustment;
 
     return Math.round(index * 10) / 10;
+  }
+
+  /**
+   * Returns the subset of differentials currently counted toward the handicap index.
+   *
+   * @param differentials - An array of historical differentials ordered from most recent to oldest.
+   * @returns The sorted differentials currently used in the handicap calculation.
+   */
+  getCountingDifferentials(differentials: number[]): number[] {
+    if (!differentials || differentials.length < 3) {
+      return [];
+    }
+
+    const recentDifferentials = differentials.slice(0, 20);
+    const { lowestN } = this.getSelectionRule(recentDifferentials.length);
+
+    return [...recentDifferentials].sort((a, b) => a - b).slice(0, lowestN);
   }
 
   /**
@@ -116,5 +119,13 @@ export class WhsService {
       return 'worsening';
     }
     return 'stable';
+  }
+
+  private getSelectionRule(numRounds: number): ProvisionalTableEntry {
+    if (numRounds >= 20) {
+      return { lowestN: 8, adjustment: 0 };
+    }
+
+    return this.PROVISIONAL_TABLE[numRounds];
   }
 }
