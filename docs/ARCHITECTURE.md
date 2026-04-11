@@ -8,7 +8,7 @@ MyNetScore is an offline-first, cross-platform mobile application (iOS and Andro
 
 The application follows a modern frontend-heavy mobile architecture, leveraging web technologies deployed within a native container.
 
-- **Presentation Layer:** Built with Angular and Ionic Framework, utilizing modern reactive state management paradigms (Signals).
+- **Presentation Layer:** Built with Angular, utilizing modern reactive state management paradigms (Signals).
 - **Styling Layer:** Tailwind CSS provides utility-first styling mapped strictly to the brand identity design tokens.
 - **Business Logic Layer:** Encapsulates the WHS mathematical engine, including the rolling 8-of-20 logic, score differential calculations, and regional rule adjustments (e.g., Golf Australia multiplier).
 - **Data Access Layer:** Uses Dexie.js for type-safe and seamless interaction with the local database.
@@ -18,7 +18,8 @@ The application follows a modern frontend-heavy mobile architecture, leveraging 
 ## 3. Technology Stack
 
 - **Frontend Framework:** Angular (Standalone components, Signals)
-- **UI Components:** Ionic Framework
+- **UI Components:** Custom components (Angular + Tailwind CSS)
+- **Icons:** NgIcons (Ionicons set)
 - **CSS Framework:** Tailwind CSS
 - **Database:** IndexedDB
 - **Database Wrapper:** Dexie.js (TypeScript)
@@ -53,6 +54,7 @@ The core of the app's utility lies in its adherence to the World Handicap System
 The UI architecture focuses on an intuitive, cascading flow designed for quick, outdoor interaction:
 
 - **The Living Index (Dashboard):** The main view is dominated by the handicap index. It employs dynamic color shifting (Green for improving, Amber/Red for worsening) and spark-line trends to convey progress at a glance.
+- **Tab-Aware Navigation:** A custom `NavigationHistoryService` tracks intra-tab history, providing predictable back-button behavior while maintaining isolation between main application tabs. This ensures that deep-linking or drilling down into a specific course details stays within its respective tab context.
 - **Cascading Inputs:** The round logging workflow uses dependent selections (selecting a Course immediately filters available Tees) to minimize friction.
 - **On-the-Fly Creation:** Users can define new Courses or Tees inline during the round logging process, avoiding workflow interruption.
 - **Visual States:** Clear status indicators (e.g., glowing dots for "counting" rounds) make complex WHS rules easily digestible for the user.
