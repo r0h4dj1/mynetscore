@@ -7,6 +7,7 @@ import { NgIcon } from '@ng-icons/core';
  */
 @Component({
   selector: 'app-rounds',
+  host: { class: 'block h-full' },
   templateUrl: './rounds.component.html',
   standalone: true,
   imports: [NgIcon, RouterLink],

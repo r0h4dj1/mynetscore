@@ -3,6 +3,7 @@ import { CourseDetailPage } from './course-detail.component';
 import { CourseService } from '../../services/course.service';
 import { ToastService } from '../../services/toast.service';
 import { BottomSheetService } from '../../services/bottom-sheet.service';
+import { NavigationHistoryService } from '../../services/navigation-history.service';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject } from 'rxjs';
@@ -24,6 +25,9 @@ describe('CourseDetailPage', () => {
   };
   let bottomSheetServiceMock: {
     open: MockInstance;
+  };
+  let navigationHistoryServiceMock: {
+    pop: MockInstance;
   };
   let routerMock: {
     navigate: MockInstance;
@@ -51,6 +55,10 @@ describe('CourseDetailPage', () => {
       open: vi.fn(),
     };
 
+    navigationHistoryServiceMock = {
+      pop: vi.fn().mockResolvedValue(true),
+    };
+
     routerMock = {
       navigate: vi.fn(),
     };
@@ -63,6 +71,7 @@ describe('CourseDetailPage', () => {
         { provide: CourseService, useValue: courseServiceMock },
         { provide: ToastService, useValue: toastServiceMock },
         { provide: BottomSheetService, useValue: bottomSheetServiceMock },
+        { provide: NavigationHistoryService, useValue: navigationHistoryServiceMock },
         { provide: Router, useValue: routerMock },
         {
           provide: ActivatedRoute,
@@ -77,6 +86,13 @@ describe('CourseDetailPage', () => {
     Object.defineProperty(component, 'cdr', {
       value: { markForCheck: vi.fn() },
       writable: true,
+    });
+  });
+
+  describe('goBack', () => {
+    it('should call navigationHistoryService.pop()', async () => {
+      await component.goBack();
+      expect(navigationHistoryServiceMock.pop).toHaveBeenCalled();
     });
   });
 

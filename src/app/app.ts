@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
+import { RouterOutlet } from '@angular/router';
 import { ToastContainerComponent } from './components/toast-container/toast-container.component';
 import { BottomSheetModalComponent } from './components/bottom-sheet-modal/bottom-sheet-modal.component';
 
@@ -8,7 +8,8 @@ import { BottomSheetModalComponent } from './components/bottom-sheet-modal/botto
  */
 @Component({
   selector: 'app-root',
-  imports: [IonApp, IonRouterOutlet, ToastContainerComponent, BottomSheetModalComponent],
+  host: { class: 'block h-full' },
+  imports: [RouterOutlet, ToastContainerComponent, BottomSheetModalComponent],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })

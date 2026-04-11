@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
 import {
   AddCourseModalComponent,
@@ -15,6 +15,7 @@ import { CourseService } from '../../services/course.service';
 import { HandicapStateService } from '../../services/handicap-state.service';
 import { RoundService } from '../../services/round.service';
 import { ToastService } from '../../services/toast.service';
+import { NavigationHistoryService } from '../../services/navigation-history.service';
 import { ValidationStatusDirective } from '../../directives/validation-status.directive';
 import {
   ListSelectorModalComponent,
@@ -41,12 +42,13 @@ interface PendingRoundPayload {
  */
 @Component({
   selector: 'app-add-round',
+  host: { class: 'block h-full' },
   templateUrl: './add-round.component.html',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, NgIcon, ValidationStatusDirective, PopUpComponent],
+  imports: [CommonModule, ReactiveFormsModule, NgIcon, ValidationStatusDirective, PopUpComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AddRoundPage {
+export class AddRoundPage implements OnInit {
   private readonly courseService = inject(CourseService);
   private readonly roundService = inject(RoundService);
   private readonly handicapStateService = inject(HandicapStateService);
@@ -55,6 +57,7 @@ export class AddRoundPage {
   private readonly fb = inject(FormBuilder);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly bottomSheetService = inject(BottomSheetService);
+  private readonly navigationHistoryService = inject(NavigationHistoryService);
 
   readonly todayIsoDate = this.getTodayIsoDate();
   readonly minGrossScore = ROUND_LIMITS.MIN_GROSS_SCORE;
@@ -85,9 +88,16 @@ export class AddRoundPage {
   private pendingRoundPayload: PendingRoundPayload | null = null;
 
   /**
-   * Ionic lifecycle hook — fires every time the view becomes active.
+   * Navigates back to the previous page in history.
    */
-  ionViewWillEnter(): void {
+  async goBack(): Promise<void> {
+    await this.navigationHistoryService.pop();
+  }
+
+  /**
+   * Initializes the component.
+   */
+  ngOnInit(): void {
     this.resetForm();
     void this.loadCourses();
   }
