@@ -1,16 +1,35 @@
-<ion-tabs>
-  <ion-tab-bar
-    slot="bottom"
-    class="h-[80px] pb-4 bg-surface/80 backdrop-blur-md [--background:transparent] [--border:0] [--color:var(--color-primary-font)] [--color-selected:var(--color-primary-light)]"
-  >
-    <ion-tab-button tab="home" aria-label="Home" class="bg-transparent [--background:transparent]">
+<div class="flex h-full flex-col">
+  <div class="flex-1 overflow-y-auto">
+    <router-outlet></router-outlet>
+  </div>
+
+  <nav class="bg-surface/80 flex h-[80px] items-center justify-around pb-4 backdrop-blur-md">
+    <button
+      type="button"
+      class="text-primary-font flex flex-1 flex-col items-center justify-center bg-transparent border-none cursor-pointer"
+      [class.text-primary-light]="isTabActive('home')"
+      (click)="handleTabClick('home')"
+      aria-label="Home"
+    >
       <ng-icon name="ionHome" size="1.5rem"></ng-icon>
-    </ion-tab-button>
-    <ion-tab-button tab="rounds" aria-label="Rounds" class="bg-transparent [--background:transparent]">
+    </button>
+    <button
+      type="button"
+      class="text-primary-font flex flex-1 flex-col items-center justify-center bg-transparent border-none cursor-pointer"
+      [class.text-primary-light]="isTabActive('rounds')"
+      (click)="handleTabClick('rounds')"
+      aria-label="Rounds"
+    >
       <ng-icon name="ionBook" size="1.5rem"></ng-icon>
-    </ion-tab-button>
-    <ion-tab-button tab="courses" aria-label="Courses" class="bg-transparent [--background:transparent]">
+    </button>
+    <button
+      type="button"
+      class="text-primary-font flex flex-1 flex-col items-center justify-center bg-transparent border-none cursor-pointer"
+      [class.text-primary-light]="isTabActive('courses')"
+      (click)="handleTabClick('courses')"
+      aria-label="Courses"
+    >
       <ng-icon name="ionGolf" size="1.5rem"></ng-icon>
-    </ion-tab-button>
-  </ion-tab-bar>
-</ion-tabs>
+    </button>
+  </nav>
+</div>
