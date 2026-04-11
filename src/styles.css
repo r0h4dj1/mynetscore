@@ -1,15 +1,4 @@
 @import '@fontsource-variable/ibm-plex-sans';
-
-/* Define layer order - earlier layers have LOWER priority */
-@layer ionic, base, components, utilities;
-
-/* Import Ionic styles into the lowest-priority layer */
-@import '@ionic/angular/css/core.css' layer(ionic);
-@import '@ionic/angular/css/normalize.css' layer(ionic);
-@import '@ionic/angular/css/structure.css' layer(ionic);
-@import '@ionic/angular/css/typography.css' layer(ionic);
-
-/* Import Tailwind - its utilities will be in the highest-priority layer */
 @import 'tailwindcss';
 
 @theme {
@@ -39,8 +28,10 @@
 }
 
 @layer base {
-  :root {
-    --ion-font-family: var(--font-sans);
+  html,
+  body {
+    height: 100%;
+    margin: 0;
   }
 
   body {
@@ -48,5 +39,6 @@
     font-weight: 500;
     background-color: var(--color-background);
     color: var(--color-primary-font);
+    overflow: hidden;
   }
 }
