@@ -2,7 +2,9 @@ import { ChangeDetectionStrategy, Component, effect, inject, signal, Type } from
 import { NgComponentOutlet } from '@angular/common';
 import { BottomSheetService } from '../../services/bottom-sheet.service';
 
-const DRAG_DISMISS_THRESHOLD = 150;
+const SHEET_HEIGHT_THRESHOLD = 360;
+const SHORT_DISMISS_THRESHOLD = 80;
+const TALL_DISMISS_THRESHOLD = 120;
 
 /**
  * Global bottom sheet overlay host rendered once at the root level.
@@ -40,6 +42,7 @@ export class BottomSheetModalComponent {
   private currentTranslate = 0;
   private isDragging = false;
   private sheetEl: HTMLElement | null = null;
+  private dragDismissThreshold = TALL_DISMISS_THRESHOLD;
 
   constructor() {
     effect(() => {
@@ -74,6 +77,10 @@ export class BottomSheetModalComponent {
     const handleEl = event.currentTarget as HTMLElement;
     this.sheetEl = handleEl.closest('[data-testid="sheet"]') as HTMLElement;
     if (!this.sheetEl) return;
+
+    const height = this.sheetEl.getBoundingClientRect().height;
+    this.dragDismissThreshold = height < SHEET_HEIGHT_THRESHOLD ? SHORT_DISMISS_THRESHOLD : TALL_DISMISS_THRESHOLD;
+
     this.startY = event.clientY;
     this.isDragging = true;
     handleEl.setPointerCapture(event.pointerId);
@@ -94,7 +101,7 @@ export class BottomSheetModalComponent {
     const sheetEl = this.sheetEl;
     this.sheetEl = null;
 
-    if (this.currentTranslate > DRAG_DISMISS_THRESHOLD) {
+    if (this.currentTranslate >= this.dragDismissThreshold) {
       sheetEl.style.transition = 'transform 200ms ease-in';
       sheetEl.style.transform = 'translateY(100%)';
       setTimeout(() => {
