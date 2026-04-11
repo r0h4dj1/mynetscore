@@ -1,13 +1,13 @@
 import { Component } from '@angular/core';
-import { IonContent } from '@ionic/angular/standalone';
 
 /**
  * Component representing the home page.
  */
 @Component({
   selector: 'app-home',
+  host: { class: 'block h-full' },
   templateUrl: './home.component.html',
   standalone: true,
-  imports: [IonContent],
+  imports: [],
 })
 export class HomePage {}

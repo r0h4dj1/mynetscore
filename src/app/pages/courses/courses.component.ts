@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
 import { CourseService } from '../../services/course.service';
@@ -19,12 +19,13 @@ interface CourseWithTeeCount extends Course {
  */
 @Component({
   selector: 'app-courses',
+  host: { class: 'block h-full' },
   templateUrl: './courses.component.html',
   standalone: true,
   imports: [RouterModule, NgIcon],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CoursesPage {
+export class CoursesPage implements OnInit {
   private readonly courseService = inject(CourseService);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly toastService = inject(ToastService);
@@ -33,9 +34,9 @@ export class CoursesPage {
   courses: CourseWithTeeCount[] = [];
 
   /**
-   * Ionic lifecycle hook — fires every time the view becomes active.
+   * Initializes the component.
    */
-  ionViewWillEnter() {
+  ngOnInit() {
     this.loadCourses();
   }
 

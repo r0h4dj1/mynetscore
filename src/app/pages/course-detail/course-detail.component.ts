@@ -1,10 +1,11 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { NgIcon } from '@ng-icons/core';
 import { CourseService } from '../../services/course.service';
 import { ToastService } from '../../services/toast.service';
 import { BottomSheetService } from '../../services/bottom-sheet.service';
+import { NavigationHistoryService } from '../../services/navigation-history.service';
 import { Course, Tee } from '../../database/db';
 import { ValidationStatusDirective } from '../../directives/validation-status.directive';
 import { WHS_LIMITS } from '../../constants/whs.constants';
@@ -19,9 +20,10 @@ import { EditTeeModalComponent, EditTeeModalResult } from '../../components/edit
  */
 @Component({
   selector: 'app-course-detail',
+  host: { class: 'block h-full' },
   templateUrl: './course-detail.component.html',
   standalone: true,
-  imports: [RouterModule, ReactiveFormsModule, NgIcon, ValidationStatusDirective],
+  imports: [ReactiveFormsModule, NgIcon, ValidationStatusDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CourseDetailPage implements OnInit {
@@ -32,6 +34,7 @@ export class CourseDetailPage implements OnInit {
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly toastService = inject(ToastService);
   private readonly bottomSheetService = inject(BottomSheetService);
+  private readonly navigationHistoryService = inject(NavigationHistoryService);
 
   courseId: string | null = null;
   course: Course | undefined;
@@ -47,6 +50,13 @@ export class CourseDetailPage implements OnInit {
       slope: ['', [Validators.required, Validators.min(WHS_LIMITS.MIN_SLOPE), Validators.max(WHS_LIMITS.MAX_SLOPE)]],
       par: ['', [Validators.required, Validators.min(1)]],
     });
+  }
+
+  /**
+   * Navigates back to the previous page in history.
+   */
+  async goBack() {
+    await this.navigationHistoryService.pop();
   }
 
   /**
