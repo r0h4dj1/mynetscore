@@ -7,7 +7,6 @@ import { Mock } from 'vitest';
 type RouterEvents = NavigationEnd | NavigationCancel | NavigationError;
 
 interface MockRouter {
-  events: Subject<RouterEvents>;
   navigateByUrl: Mock<(url: string) => Promise<boolean>>;
   url: string;
 }
@@ -44,6 +43,19 @@ describe('NavigationHistoryService', () => {
 
     expect(service.getHistory('home')).toEqual(['/home']);
     expect(service.getHistory('rounds')).toEqual(['/rounds', '/rounds/add']);
+  });
+
+  it('should store urlAfterRedirects for redirected navigations', () => {
+    routerEventsSubject.next(new NavigationEnd(1, '/courses/legacy', '/courses'));
+
+    expect(service.getHistory('courses')).toEqual(['/courses']);
+  });
+
+  it('should avoid duplicate consecutive history entries', () => {
+    routerEventsSubject.next(new NavigationEnd(1, '/rounds', '/rounds'));
+    routerEventsSubject.next(new NavigationEnd(2, '/rounds', '/rounds'));
+
+    expect(service.getHistory('rounds')).toEqual(['/rounds']);
   });
 
   it('should recognize tab even with query parameters', () => {
@@ -120,7 +132,7 @@ describe('NavigationHistoryService', () => {
     expect(service.getHistory('rounds')).toEqual([]);
   });
 
-  it('should prevent navigation loop in pop() using isPopping flag', async () => {
+  it('should not re-add the popped URL when pop navigation emits a NavigationEnd', async () => {
     router.url = '/rounds/add';
     routerEventsSubject.next(new NavigationEnd(1, '/rounds', '/rounds'));
     routerEventsSubject.next(new NavigationEnd(2, '/rounds/add', '/rounds/add'));
@@ -132,21 +144,73 @@ describe('NavigationHistoryService', () => {
     expect(service.getHistory('rounds')).toEqual(['/rounds']);
   });
 
-  it('should reset isPopping if navigation is canceled', async () => {
+  it('should resume tracking after a pop navigation is canceled', async () => {
     router.url = '/rounds';
     routerEventsSubject.next(new NavigationEnd(1, '/rounds', '/rounds'));
     router.url = '/rounds/add';
     routerEventsSubject.next(new NavigationEnd(2, '/rounds/add', '/rounds/add'));
 
-    await service.pop(); // Sets isPopping = true
+    await service.pop();
 
-    // Simulate cancellation
     routerEventsSubject.next(new NavigationCancel(3, '/rounds', 'Canceled by guard'));
 
-    // Perform a new navigation that should be tracked
     router.url = '/courses';
     routerEventsSubject.next(new NavigationEnd(4, '/courses', '/courses'));
 
     expect(service.getHistory('courses')).toEqual(['/courses']);
+  });
+
+  it('should resume tracking after a pop navigation errors', async () => {
+    router.url = '/rounds';
+    routerEventsSubject.next(new NavigationEnd(1, '/rounds', '/rounds'));
+    router.url = '/rounds/add';
+    routerEventsSubject.next(new NavigationEnd(2, '/rounds/add', '/rounds/add'));
+
+    await service.pop();
+
+    routerEventsSubject.next(new NavigationError(3, '/rounds', new Error('Router failure')));
+
+    router.url = '/courses';
+    routerEventsSubject.next(new NavigationEnd(4, '/courses', '/courses'));
+
+    expect(service.getHistory('courses')).toEqual(['/courses']);
+  });
+
+  it('should return true if at home root', () => {
+    router.url = '/home';
+    routerEventsSubject.next(new NavigationEnd(1, '/home', '/home'));
+    expect(service.isAtTabRoot()).toBe(true);
+  });
+
+  it('should return true if at rounds root with 1 history entry', () => {
+    router.url = '/rounds';
+    routerEventsSubject.next(new NavigationEnd(1, '/rounds', '/rounds'));
+    expect(service.isAtTabRoot()).toBe(true);
+  });
+
+  it('should return false if at a sub-page of rounds', () => {
+    router.url = '/rounds/add';
+    routerEventsSubject.next(new NavigationEnd(1, '/rounds', '/rounds'));
+    routerEventsSubject.next(new NavigationEnd(2, '/rounds/add', '/rounds/add'));
+    expect(service.isAtTabRoot()).toBe(false);
+  });
+
+  it('should return false if at rounds root but has history stack longer than 1', () => {
+    router.url = '/rounds';
+    routerEventsSubject.next(new NavigationEnd(1, '/rounds/add', '/rounds/add'));
+    routerEventsSubject.next(new NavigationEnd(2, '/rounds', '/rounds'));
+    expect(service.isAtTabRoot()).toBe(false);
+  });
+
+  it('should return true if deep-linked to rounds root', () => {
+    router.url = '/rounds';
+    routerEventsSubject.next(new NavigationEnd(1, '/rounds', '/rounds'));
+    expect(service.isAtTabRoot()).toBe(true);
+  });
+
+  it('should return false if deep-linked to rounds sub-page', () => {
+    router.url = '/rounds/add';
+    routerEventsSubject.next(new NavigationEnd(1, '/rounds/add', '/rounds/add'));
+    expect(service.isAtTabRoot()).toBe(false);
   });
 });

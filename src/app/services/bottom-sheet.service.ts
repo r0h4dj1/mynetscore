@@ -29,6 +29,15 @@ export class BottomSheetService {
   readonly state: Signal<BottomSheetState> = this._state.asReadonly();
 
   /**
+   * Whether the bottom sheet is currently open.
+   *
+   * @returns True if open, false otherwise.
+   */
+  get isOpen(): boolean {
+    return this._state().isOpen;
+  }
+
+  /**
    * Opens the bottom sheet with the given component and optional inputs.
    *
    * @param component - The component to render inside the bottom sheet.
