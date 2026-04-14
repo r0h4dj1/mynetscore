@@ -132,6 +132,19 @@ export class NavigationHistoryService {
   }
 
   /**
+   * Checks if the user is currently at the root of a tab stack.
+   *
+   * @returns True if at the base of the current tab.
+   */
+  isAtTabRoot(): boolean {
+    const currentUrl = this.router.url.split(/[?#]/)[0];
+    const tab = this.getTabFromUrl(currentUrl);
+    if (!tab) return true;
+    const stack = this.histories[tab];
+    return currentUrl === `/${tab}` && stack.length <= 1;
+  }
+
+  /**
    * Gets the last visited URL for a specific tab.
    *
    * @param tab - The tab name.
