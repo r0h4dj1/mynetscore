@@ -1,17 +1,5 @@
 <div class="relative flex flex-col h-full">
-  <header class="flex items-center justify-between px-4 py-3 pt-10 border-b border-borders shrink-0">
-    <div class="flex items-center min-w-0">
-      <button
-        type="button"
-        (click)="goBack()"
-        aria-label="Back"
-        class="bg-transparent border-none outline-none mr-2 flex items-center justify-center p-2 -ml-2 rounded-full active:bg-surface transition-colors"
-      >
-        <ng-icon name="ionChevronBack" class="text-2xl" [color]="'var(--color-warm-white-dim)'"></ng-icon>
-      </button>
-      <h1 class="text-xl font-medium text-primary-font truncate m-0">Add round</h1>
-    </div>
-  </header>
+  <app-page-header title="Add round" backButton></app-page-header>
 
   <main class="flex-1 overflow-y-auto">
     <div class="px-4 py-6 h-full">
@@ -47,7 +35,7 @@
               <ng-icon
                 name="ionChevronDown"
                 class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-lg"
-                [color]="'var(--color-warm-white-dim)'"
+                [color]="'var(--color-alabaster-grey)'"
               ></ng-icon>
             </div>
           </section>
@@ -96,7 +84,7 @@
               <ng-icon
                 name="ionChevronDown"
                 class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-lg"
-                [color]="roundForm.controls.teeId.disabled ? 'var(--color-borders)' : 'var(--color-warm-white-dim)'"
+                [color]="roundForm.controls.teeId.disabled ? 'var(--color-borders)' : 'var(--color-alabaster-grey)'"
               ></ng-icon>
             </div>
           </section>
@@ -118,7 +106,7 @@
               <ng-icon
                 name="ionCalendarClear"
                 class="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-lg"
-                [color]="'var(--color-warm-white-dim)'"
+                [color]="'var(--color-alabaster-grey)'"
               ></ng-icon>
             </button>
           </section>
@@ -143,7 +131,7 @@
             type="submit"
             class="w-full h-14 rounded-lg font-medium text-lg border-none outline-none active:scale-[0.98] transition-transform flex items-center justify-center"
             [class.bg-primary]="roundForm.valid && !isSaving"
-            [class.text-true-obsidian]="roundForm.valid && !isSaving"
+            [class.text-onyx]="roundForm.valid && !isSaving"
             [class.bg-borders]="!roundForm.valid || isSaving"
             [class.text-secondary-font]="!roundForm.valid || isSaving"
             [disabled]="isSaving"

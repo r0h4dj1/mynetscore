@@ -9,11 +9,8 @@ describe('WhsService', () => {
 
   describe('calculateDifferential', () => {
     it('should calculate the WHS differential rounded to one decimal place', () => {
-      // (85 - 72.1) * (113 / 131) = 11.129 -> 11.1
       expect(service.calculateDifferential(85, 72.1, 131)).toBe(11.1);
-      // (72 - 72) * (113 / 113) = 0
       expect(service.calculateDifferential(72, 72, 113)).toBe(0);
-      // (100 - 68.5) * (113 / 120) = 29.6625 -> 29.7
       expect(service.calculateDifferential(100, 68.5, 120)).toBe(29.7);
     });
   });
@@ -26,21 +23,16 @@ describe('WhsService', () => {
     });
 
     it('should apply provisional calculation adjustments for 3 to 19 rounds', () => {
-      // 3 rounds: lowest 1 (12), adjustment -2 = 10
       expect(service.calculateHandicapIndex([15, 12, 20])).toBe(10);
-      // 5 rounds: lowest 1 (12), adjustment 0 = 12
       expect(service.calculateHandicapIndex([15, 12, 20, 18, 14])).toBe(12);
     });
 
     it('should calculate the index using the lowest 8 of the most recent 20 rounds', () => {
-      // 20 rounds: 1 to 20. Lowest 8 are 1..8. Sum = 36, Avg = 4.5
       const rounds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
       expect(service.calculateHandicapIndex(rounds)).toBe(4.5);
     });
 
     it('should ignore rounds beyond the most recent 20', () => {
-      // 20 recent rounds of 10, 5 older rounds of 0.1
-      // If it used older rounds, the average would drop
       const recentRounds = new Array(20).fill(10);
       const olderRounds = new Array(5).fill(0.1);
       expect(service.calculateHandicapIndex([...recentRounds, ...olderRounds])).toBe(10);
@@ -48,8 +40,41 @@ describe('WhsService', () => {
 
     it('should apply the Golf Australia 0.93 multiplier when the flag is true', () => {
       const rounds = new Array(20).fill(10);
-      // Base index 10 * 0.93 = 9.3
       expect(service.calculateHandicapIndex(rounds, true)).toBe(9.3);
+    });
+  });
+
+  describe('getCountingRounds', () => {
+    it('should return an empty array if there are fewer than 3 rounds', () => {
+      expect(service.getCountingRounds([{ differential: 1 }, { differential: 2 }])).toEqual([]);
+    });
+
+    it('should return the correct subset of lowest rounds based on round count', () => {
+      const rounds = [
+        { id: '1', differential: 15 },
+        { id: '2', differential: 12 },
+        { id: '3', differential: 20 },
+        { id: '4', differential: 18 },
+        { id: '5', differential: 14 },
+      ];
+      expect(service.getCountingRounds(rounds)).toEqual([{ id: '2', differential: 12 }]);
+    });
+
+    it('should handle duplicate differentials correctly', () => {
+      const rounds = [
+        { id: '1', differential: 10 },
+        { id: '2', differential: 10 },
+        { id: '3', differential: 15 },
+        { id: '4', differential: 20 },
+        { id: '5', differential: 5 },
+      ];
+      expect(service.getCountingRounds(rounds)).toEqual([{ id: '5', differential: 5 }]);
+
+      const sixRounds = [...rounds, { id: '6', differential: 25 }];
+      const result = service.getCountingRounds(sixRounds);
+      expect(result.length).toBe(2);
+      expect(result).toContain(sixRounds[4]);
+      expect(result.some((r) => r.differential === 10)).toBe(true);
     });
   });
 
@@ -59,10 +84,8 @@ describe('WhsService', () => {
     });
 
     it('should return the correct subset of lowest differentials based on round count', () => {
-      // 5 rounds: lowest 1
       expect(service.getCountingDifferentials([15, 12, 20, 18, 14])).toEqual([12]);
 
-      // 20+ rounds: lowest 8 from the most recent 20
       const recentRounds = [...new Array(8).fill(5), ...new Array(12).fill(20)];
       expect(service.getCountingDifferentials(recentRounds)).toEqual(new Array(8).fill(5));
     });

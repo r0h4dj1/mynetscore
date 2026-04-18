@@ -1,15 +1,15 @@
 <div class="flex flex-col h-full">
-  <header class="flex items-center justify-between px-4 py-3 pt-10 border-b border-borders shrink-0">
-    <h1 class="text-2xl font-medium m-0">Rounds</h1>
+  <app-page-header title="Rounds">
     <button
+      action
       [routerLink]="['/rounds/add']"
       type="button"
-      class="flex items-center justify-center gap-1 px-4 py-2 rounded-lg bg-primary text-true-obsidian text-lg font-medium border-none outline-none h-11 active:scale-[0.98] transition-transform"
+      class="flex items-center justify-center gap-1 px-4 py-2 rounded-lg bg-primary text-onyx text-lg font-medium border-none outline-none h-11 active:scale-[0.98] transition-transform"
     >
       <ng-icon name="ionAdd"></ng-icon>
       Add
     </button>
-  </header>
+  </app-page-header>
 
   <main class="flex-1 overflow-y-auto">
     <div class="px-4 py-6 h-full">
