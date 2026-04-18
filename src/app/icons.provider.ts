@@ -11,6 +11,10 @@ import {
   ionCreate,
   ionCalendarClear,
   ionCheckmark,
+  ionCaretUp,
+  ionCaretDown,
+  ionArrowForward,
+  ionCaretForward,
 } from '@ng-icons/ionicons';
 
 export const iconsProvider: Provider[] = provideIcons({
@@ -24,4 +28,8 @@ export const iconsProvider: Provider[] = provideIcons({
   ionCreate,
   ionCalendarClear,
   ionCheckmark,
+  ionCaretUp,
+  ionCaretDown,
+  ionArrowForward,
+  ionCaretForward,
 });

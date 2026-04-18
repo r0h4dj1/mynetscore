@@ -82,7 +82,31 @@ export class WhsService {
   }
 
   /**
+   * Returns the subset of rounds currently counted toward the handicap index.
+   *
+   * @param rounds - An array of historical rounds (must include 'differential' property).
+   * @returns The subset of rounds currently used in the handicap calculation.
+   */
+  getCountingRounds<T extends { differential: number }>(rounds: T[]): T[] {
+    if (!rounds || rounds.length < 3) {
+      return [];
+    }
+
+    const { lowestN } = this.getSelectionRule(rounds.length);
+
+    // Sort by differential ascending, then by original index as a deterministic
+    // tie-breaker so equal differentials always produce the same selection.
+    return rounds
+      .map((r, i) => ({ r, i }))
+      .sort((a, b) => a.r.differential - b.r.differential || a.i - b.i)
+      .slice(0, lowestN)
+      .map(({ r }) => r);
+  }
+
+  /**
    * Returns the subset of differentials currently counted toward the handicap index.
+   * Enforces the WHS "most recent 20" window internally regardless of how many
+   * differentials are supplied by the caller.
    *
    * @param differentials - An array of historical differentials ordered from most recent to oldest.
    * @returns The sorted differentials currently used in the handicap calculation.
@@ -93,9 +117,8 @@ export class WhsService {
     }
 
     const recentDifferentials = differentials.slice(0, 20);
-    const { lowestN } = this.getSelectionRule(recentDifferentials.length);
-
-    return [...recentDifferentials].sort((a, b) => a - b).slice(0, lowestN);
+    const rounds = recentDifferentials.map((d) => ({ differential: d }));
+    return this.getCountingRounds(rounds).map((r) => r.differential);
   }
 
   /**

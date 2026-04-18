@@ -15,7 +15,7 @@ import { CourseService } from '../../services/course.service';
 import { HandicapStateService } from '../../services/handicap-state.service';
 import { RoundService } from '../../services/round.service';
 import { ToastService } from '../../services/toast.service';
-import { NavigationHistoryService } from '../../services/navigation-history.service';
+
 import { ValidationStatusDirective } from '../../directives/validation-status.directive';
 import {
   ListSelectorModalComponent,
@@ -23,6 +23,7 @@ import {
 } from '../../components/list-selector-modal/list-selector-modal.component';
 import { DatePickerComponent } from '../../components/date-picker/date-picker.component';
 import { PopUpComponent } from '../../components/pop-up/pop-up.component';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 
 interface RoundFormValue {
   courseId: string;
@@ -45,7 +46,7 @@ interface PendingRoundPayload {
   host: { class: 'block h-full' },
   templateUrl: './add-round.component.html',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, NgIcon, ValidationStatusDirective, PopUpComponent],
+  imports: [CommonModule, ReactiveFormsModule, NgIcon, ValidationStatusDirective, PopUpComponent, PageHeaderComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddRoundPage implements OnInit {
@@ -57,7 +58,6 @@ export class AddRoundPage implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly bottomSheetService = inject(BottomSheetService);
-  private readonly navigationHistoryService = inject(NavigationHistoryService);
 
   readonly todayIsoDate = this.getTodayIsoDate();
   readonly minGrossScore = ROUND_LIMITS.MIN_GROSS_SCORE;
@@ -86,13 +86,6 @@ export class AddRoundPage implements OnInit {
   duplicateSummary = '';
   private readonly dismissedValidationFields = new Set<keyof RoundFormValue>();
   private pendingRoundPayload: PendingRoundPayload | null = null;
-
-  /**
-   * Navigates back to the previous page in history.
-   */
-  async goBack(): Promise<void> {
-    await this.navigationHistoryService.pop();
-  }
 
   /**
    * Initializes the component.
