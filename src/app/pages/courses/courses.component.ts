@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import { NgIcon } from '@ng-icons/core';
 import { CourseService } from '../../services/course.service';
 import { ToastService } from '../../services/toast.service';
@@ -22,7 +23,7 @@ interface CourseWithTeeCount extends Course {
   host: { class: 'block h-full' },
   templateUrl: './courses.component.html',
   standalone: true,
-  imports: [RouterModule, NgIcon],
+  imports: [RouterModule, NgIcon, PageHeaderComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CoursesPage implements OnInit {
