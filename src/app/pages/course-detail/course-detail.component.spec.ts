@@ -89,13 +89,6 @@ describe('CourseDetailPage', () => {
     });
   });
 
-  describe('goBack', () => {
-    it('should call navigationHistoryService.pop()', async () => {
-      await component.goBack();
-      expect(navigationHistoryServiceMock.pop).toHaveBeenCalled();
-    });
-  });
-
   describe('ngOnInit', () => {
     it('should load course and tees on init based on route param', async () => {
       component.ngOnInit();

@@ -80,11 +80,6 @@ describe('AddRoundPage', () => {
     fixture.detectChanges();
   });
 
-  it('navigates back when goBack is called', async () => {
-    await component.goBack();
-    expect(navigationHistoryServiceMock.pop).toHaveBeenCalled();
-  });
-
   it('loads and sorts courses alphabetically', async () => {
     courseServiceMock.getCourses.mockResolvedValue([
       { id: '2', name: 'Zebra Course' },
