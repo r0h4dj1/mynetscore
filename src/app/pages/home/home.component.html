@@ -1,3 +1,132 @@
-<div class="p-4">
-  <h2>Home</h2>
+<div class="flex flex-col h-full">
+  <app-page-header title="MyNetScore"></app-page-header>
+
+  <main class="flex-1 flex flex-col px-4 pt-2 pb-6 overflow-hidden min-h-0">
+    <div class="flex flex-col items-center justify-center flex-1 min-h-[120px] py-4">
+      @if (totalRoundsInWindow() > 0 && handicapIndex() !== null) {
+        <div
+          class="text-[3.75rem] min-[380px]:text-[4.5rem] font-bold leading-none tracking-tight text-primary-font shrink-0"
+        >
+          {{ handicapIndex() | number: '1.1-1' }}
+        </div>
+        <div
+          class="text-secondary-font text-base min-[380px]:text-lg flex items-center gap-1 font-medium mt-1 shrink-0"
+        >
+          Handicap Index
+          @if (isProvisional()) {
+            <span class="text-secondary-font/70">(provisional)</span>
+          }
+        </div>
+      } @else {
+        <div
+          class="text-[3.75rem] min-[380px]:text-[4.5rem] font-bold leading-none tracking-tight text-primary-font opacity-50 shrink-0"
+        >
+          &mdash;
+        </div>
+        <div class="text-secondary-font text-base min-[380px]:text-lg font-medium mt-1 shrink-0">Handicap Index</div>
+      }
+
+      <div
+        class="h-6 mt-1 flex items-center justify-center text-sm min-[380px]:text-base font-semibold {{
+          trendDisplay().class
+        }} shrink-0"
+      >
+        @if (trend() !== 'none') {
+          @if (trendDisplay().icon) {
+            <ng-icon [name]="trendDisplay().icon!" class="mr-1"></ng-icon>
+          }
+          {{ trendDisplay().text }}
+        }
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3 min-[380px]:gap-4 shrink-0 py-4">
+      <div class="bg-surface rounded-2xl p-3 min-[380px]:p-4 flex flex-col items-center justify-center shadow-sm">
+        <span class="text-xl min-[380px]:text-2xl font-bold text-primary-font">{{ totalRounds() }}</span>
+        <span class="text-secondary-font text-xs min-[380px]:text-sm mt-1">Rounds</span>
+      </div>
+      <div class="bg-surface rounded-2xl p-3 min-[380px]:p-4 flex flex-col items-center justify-center shadow-sm">
+        <span class="text-xl min-[380px]:text-2xl font-bold text-primary-font">{{ totalCoursesPlayed() }}</span>
+        <span class="text-secondary-font text-xs min-[380px]:text-sm mt-1">Courses</span>
+      </div>
+    </div>
+
+    <div class="flex flex-col shrink-0 mb-4">
+      <div class="flex justify-between items-end px-1 mb-3">
+        <h3 class="text-xl font-medium text-primary-font m-0">Recent rounds</h3>
+        @if (recentRounds().length > 0) {
+          <a
+            routerLink="/rounds"
+            class="text-primary font-medium text-lg flex items-center gap-1 hover:opacity-80 transition-opacity no-underline"
+          >
+            See all <ng-icon name="ionArrowForward" class="text-sm"></ng-icon>
+          </a>
+        }
+      </div>
+
+      <div class="relative flex flex-col gap-2 min-[380px]:gap-3 shrink-0">
+        @if (recentRounds().length === 0) {
+          <div class="absolute inset-0 flex flex-col items-center justify-center z-10">
+            <h2 class="text-secondary-font">No rounds recorded</h2>
+          </div>
+        }
+
+        @for (round of recentRounds(); track round.id) {
+          <div
+            class="bg-surface rounded-2xl p-3 min-[380px]:p-4 flex items-center justify-between shadow-sm shrink-0 gap-2 relative z-20"
+          >
+            <div class="flex items-center gap-2 min-[380px]:gap-3 flex-1 min-w-0">
+              <div
+                class="w-2 h-2 rounded-full flex-shrink-0"
+                [class.bg-success]="isRoundCounting(round.id)"
+                [class.bg-transparent]="!isRoundCounting(round.id)"
+              ></div>
+              <div class="flex flex-col flex-1 min-w-0">
+                <span class="text-primary-font text-[0.95rem] min-[380px]:text-[1.05rem] truncate block">{{
+                  round.courseName
+                }}</span>
+                <span class="text-secondary-font text-xs min-[380px]:text-sm mt-0.5">{{
+                  round.date | date: 'd MMM' : 'UTC'
+                }}</span>
+              </div>
+            </div>
+            <div class="flex flex-col items-end flex-shrink-0">
+              <span class="text-primary-font text-[1rem] min-[380px]:text-[1.1rem]">{{ round.grossScore }}</span>
+              <span class="text-secondary-font text-xs min-[380px]:text-sm mt-0.5">{{
+                round.differential | number: '1.1-1'
+              }}</span>
+            </div>
+          </div>
+        }
+
+        @for (p of placeholders(); track $index) {
+          <div
+            class="bg-surface rounded-2xl p-3 min-[380px]:p-4 flex items-center justify-between shadow-sm shrink-0 gap-2 opacity-0 pointer-events-none select-none"
+            aria-hidden="true"
+          >
+            <div class="flex items-center gap-2 min-[380px]:gap-3 flex-1 min-w-0">
+              <div class="w-2 h-2 rounded-full flex-shrink-0"></div>
+              <div class="flex flex-col flex-1 min-w-0">
+                <span class="text-[0.95rem] min-[380px]:text-[1.05rem] block">&nbsp;</span>
+                <span class="text-xs min-[380px]:text-sm mt-0.5">&nbsp;</span>
+              </div>
+            </div>
+            <div class="flex flex-col items-end flex-shrink-0">
+              <span class="text-[1rem] min-[380px]:text-[1.1rem] block">&nbsp;</span>
+              <span class="text-xs min-[380px]:text-sm mt-0.5">&nbsp;</span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="shrink-0">
+      <a
+        routerLink="/rounds/add"
+        class="bg-primary text-onyx font-medium text-base min-[380px]:text-lg rounded-lg py-2.5 min-[380px]:py-3 flex items-center justify-center w-full shadow-lg active:scale-[0.98] transition-transform no-underline"
+      >
+        <ng-icon name="ionAdd" class="mr-1 text-lg min-[380px]:text-xl"></ng-icon> Add round
+      </a>
+    </div>
+  </main>
 </div>
