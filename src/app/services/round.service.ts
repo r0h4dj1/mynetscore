@@ -1,7 +1,13 @@
 import { Injectable, inject } from '@angular/core';
-import { db, Round } from '../database/db';
+import { db, Round, Tee } from '../database/db';
 import { WhsService } from './whs.service';
 import { ROUND_LIMITS, WHS_LIMITS } from '../constants/whs.constants';
+
+export interface RoundUpdate {
+  teeId: string;
+  date: string;
+  grossScore: number;
+}
 
 /**
  * Service for managing golf rounds.
@@ -19,25 +25,10 @@ export class RoundService {
    * @returns A promise that resolves to the new round's ID.
    */
   async addRound(round: Omit<Round, 'id' | 'differential'>): Promise<string> {
-    if (round.grossScore < ROUND_LIMITS.MIN_GROSS_SCORE || round.grossScore > ROUND_LIMITS.MAX_GROSS_SCORE) {
-      throw new Error(
-        `Gross score must be between ${ROUND_LIMITS.MIN_GROSS_SCORE} and ${ROUND_LIMITS.MAX_GROSS_SCORE}.`,
-      );
-    }
+    this.assertGrossScoreInRange(round.grossScore);
 
     return await db.transaction('rw', db.tees, db.rounds, async () => {
-      const tee = await db.tees.get(round.teeId);
-      if (!tee) {
-        throw new Error(`Tee with ID ${round.teeId} does not exist.`);
-      }
-
-      if (!Number.isFinite(tee.slope) || tee.slope < WHS_LIMITS.MIN_SLOPE || tee.slope > WHS_LIMITS.MAX_SLOPE) {
-        throw new Error(
-          `Invalid tee slope. Slope must be a number between ${WHS_LIMITS.MIN_SLOPE} and ${WHS_LIMITS.MAX_SLOPE}.`,
-        );
-      }
-
-      const differential = this.whsService.calculateDifferential(round.grossScore, tee.rating, tee.slope);
+      const { differential } = await this.validateAndCalculate(round.teeId, round.grossScore);
 
       const id = crypto.randomUUID();
       const newRound: Round = {
@@ -49,6 +40,46 @@ export class RoundService {
       await db.rounds.add(newRound);
       return id;
     });
+  }
+
+  /**
+   * Updates an existing round, recomputing its differential against the (possibly new) tee.
+   *
+   * @param id - The id of the round to update.
+   * @param updates - The fields to apply to the round.
+   */
+  async updateRound(id: string, updates: RoundUpdate): Promise<void> {
+    this.assertGrossScoreInRange(updates.grossScore);
+
+    await db.transaction('rw', db.tees, db.rounds, async () => {
+      const { differential } = await this.validateAndCalculate(updates.teeId, updates.grossScore);
+
+      await db.rounds.update(id, {
+        teeId: updates.teeId,
+        date: updates.date,
+        grossScore: updates.grossScore,
+        differential,
+      });
+    });
+  }
+
+  /**
+   * Deletes a round by id.
+   *
+   * @param id - The id of the round to delete.
+   */
+  async deleteRound(id: string): Promise<void> {
+    await db.rounds.delete(id);
+  }
+
+  /**
+   * Retrieves a round by id.
+   *
+   * @param id - The id of the round to retrieve.
+   * @returns The round, or undefined if no record exists with that id.
+   */
+  async getRound(id: string): Promise<Round | undefined> {
+    return db.rounds.get(id);
   }
 
   /**
@@ -64,5 +95,29 @@ export class RoundService {
       .equals(teeId)
       .and((round) => round.date === date)
       .first();
+  }
+
+  private assertGrossScoreInRange(grossScore: number): void {
+    if (grossScore < ROUND_LIMITS.MIN_GROSS_SCORE || grossScore > ROUND_LIMITS.MAX_GROSS_SCORE) {
+      throw new Error(
+        `Gross score must be between ${ROUND_LIMITS.MIN_GROSS_SCORE} and ${ROUND_LIMITS.MAX_GROSS_SCORE}.`,
+      );
+    }
+  }
+
+  private async validateAndCalculate(teeId: string, grossScore: number): Promise<{ tee: Tee; differential: number }> {
+    const tee = await db.tees.get(teeId);
+    if (!tee) {
+      throw new Error(`Tee with ID ${teeId} does not exist.`);
+    }
+
+    if (!Number.isFinite(tee.slope) || tee.slope < WHS_LIMITS.MIN_SLOPE || tee.slope > WHS_LIMITS.MAX_SLOPE) {
+      throw new Error(
+        `Invalid tee slope. Slope must be a number between ${WHS_LIMITS.MIN_SLOPE} and ${WHS_LIMITS.MAX_SLOPE}.`,
+      );
+    }
+
+    const differential = this.whsService.calculateDifferential(grossScore, tee.rating, tee.slope);
+    return { tee, differential };
   }
 }
