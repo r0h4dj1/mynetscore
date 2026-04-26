@@ -11,8 +11,9 @@
   --color-alabaster-grey: #e4e4e7;
   --color-brick-ember: #ca0c02;
   --color-vibrant-coral: #fd6f68;
-  --color-bright-fern: #389457;
-  --color-mint-glow: #84d39c;
+  --color-dark-spruce: #1c4a2b;
+  --color-jungle-green: #3fa662;
+  --color-celadon: #90d5a7;
   --color-frosted-blue: #9ce7fc;
 
   --color-primary: var(--color-bright-amber);
@@ -24,8 +25,8 @@
   --color-secondary-font: var(--color-alabaster-grey);
   --color-error: var(--color-brick-ember);
   --color-error-light: var(--color-vibrant-coral);
-  --color-success: var(--color-bright-fern);
-  --color-success-light: var(--color-mint-glow);
+  --color-success: var(--color-jungle-green);
+  --color-success-light: var(--color-celadon);
 
   --font-sans: 'IBM Plex Sans Variable', sans-serif;
   --font-weight-light: 400;
