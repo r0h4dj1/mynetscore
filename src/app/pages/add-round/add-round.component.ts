@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
 import {
@@ -8,29 +8,14 @@ import {
   AddCourseModalResult,
 } from '../../components/add-course-modal/add-course-modal.component';
 import { AddTeeModalComponent } from '../../components/add-tee-modal/add-tee-modal.component';
-import { Course, Tee } from '../../database/db';
-import { ROUND_LIMITS } from '../../constants/whs.constants';
-import { BottomSheetService } from '../../services/bottom-sheet.service';
-import { CourseService } from '../../services/course.service';
+import { Tee } from '../../database/db';
 import { HandicapStateService } from '../../services/handicap-state.service';
 import { RoundService } from '../../services/round.service';
-import { ToastService } from '../../services/toast.service';
 
 import { ValidationStatusDirective } from '../../directives/validation-status.directive';
-import {
-  ListSelectorModalComponent,
-  SelectorItem,
-} from '../../components/list-selector-modal/list-selector-modal.component';
-import { DatePickerComponent } from '../../components/date-picker/date-picker.component';
 import { PopUpComponent } from '../../components/pop-up/pop-up.component';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
-
-interface RoundFormValue {
-  courseId: string;
-  teeId: string;
-  date: string;
-  grossScore: string;
-}
+import { RoundFormPageBase } from '../shared/round-form-page.base';
 
 interface PendingRoundPayload {
   teeId: string;
@@ -49,43 +34,18 @@ interface PendingRoundPayload {
   imports: [CommonModule, ReactiveFormsModule, NgIcon, ValidationStatusDirective, PopUpComponent, PageHeaderComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AddRoundPage implements OnInit {
-  private readonly courseService = inject(CourseService);
+export class AddRoundPage extends RoundFormPageBase implements OnInit {
   private readonly roundService = inject(RoundService);
   private readonly handicapStateService = inject(HandicapStateService);
-  private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
-  private readonly fb = inject(FormBuilder);
-  private readonly cdr = inject(ChangeDetectorRef);
-  private readonly bottomSheetService = inject(BottomSheetService);
-
-  readonly todayIsoDate = this.getTodayIsoDate();
-  readonly minGrossScore = ROUND_LIMITS.MIN_GROSS_SCORE;
-  readonly maxGrossScore = ROUND_LIMITS.MAX_GROSS_SCORE;
-
-  readonly roundForm = this.fb.nonNullable.group({
-    courseId: ['', Validators.required],
-    teeId: [{ value: '', disabled: true }, Validators.required],
-    date: [this.todayIsoDate, [Validators.required, this.futureDateValidator()]],
-    grossScore: [
-      '',
-      [
-        Validators.required,
-        Validators.min(ROUND_LIMITS.MIN_GROSS_SCORE),
-        Validators.max(ROUND_LIMITS.MAX_GROSS_SCORE),
-        Validators.pattern(/^\d+$/),
-      ],
-    ],
-  });
-
-  courses: Course[] = [];
-  tees: Tee[] = [];
-  submitCount = 0;
   isSaving = false;
   showDuplicateConfirmation = false;
   duplicateSummary = '';
-  private readonly dismissedValidationFields = new Set<keyof RoundFormValue>();
   private pendingRoundPayload: PendingRoundPayload | null = null;
+
+  constructor() {
+    super();
+  }
 
   /**
    * Initializes the component.
@@ -113,113 +73,6 @@ export class AddRoundPage implements OnInit {
     this.duplicateSummary = '';
     this.pendingRoundPayload = null;
     this.dismissedValidationFields.clear();
-  }
-
-  /**
-   * Returns whether a field should currently show its invalid state.
-   *
-   * @param controlName - The form control name to inspect.
-   * @returns Whether the control should display its invalid styling.
-   */
-  shouldShowError(controlName: keyof RoundFormValue): boolean {
-    const control = this.roundForm.controls[controlName];
-    return (
-      !!control &&
-      control.invalid &&
-      (control.touched || this.submitCount > 0) &&
-      !this.dismissedValidationFields.has(controlName)
-    );
-  }
-
-  /**
-   * Dismisses validation styling for a field after the user taps it.
-   *
-   * @param controlName - The form control to clear from the dismissed set.
-   */
-  dismissValidationError(controlName: keyof RoundFormValue): void {
-    this.dismissedValidationFields.add(controlName);
-  }
-
-  /**
-   * Handles a user changing the selected course.
-   *
-   * @param courseId - The newly selected course identifier.
-   */
-  async onCourseChanged(courseId: string): Promise<void> {
-    this.roundForm.controls.courseId.setValue(courseId);
-    await this.applySelectedCourse(courseId);
-  }
-
-  /**
-   * Handles tapping the course selector and dismisses any current validation state.
-   */
-  async onCourseSelectorTap(): Promise<void> {
-    this.dismissValidationError('courseId');
-    await this.openCourseSelector();
-  }
-
-  /**
-   * Opens the course list selector modal.
-   */
-  async openCourseSelector(): Promise<void> {
-    const items: SelectorItem[] = this.courses.map((course) => ({
-      id: course.id,
-      label: course.name,
-    }));
-
-    const result = await this.bottomSheetService.open(ListSelectorModalComponent, {
-      title: 'Select a course',
-      items,
-      selectedId: this.selectedCourseId,
-    });
-
-    if (typeof result === 'string') {
-      await this.onCourseChanged(result);
-      this.cdr.markForCheck();
-    }
-  }
-
-  /**
-   * Opens the tee list selector modal.
-   */
-  async openTeeSelector(): Promise<void> {
-    if (this.roundForm.controls.teeId.disabled) {
-      return;
-    }
-
-    const items: SelectorItem[] = this.tees.map((tee) => ({
-      id: tee.id,
-      label: tee.name,
-      subLabel: `${tee.rating} · ${tee.slope} · ${tee.par}`,
-    }));
-
-    const result = await this.bottomSheetService.open(ListSelectorModalComponent, {
-      title: 'Select a tee',
-      items,
-      selectedId: this.roundForm.controls.teeId.value,
-    });
-
-    if (typeof result === 'string') {
-      this.roundForm.controls.teeId.setValue(result);
-      this.roundForm.controls.teeId.markAsTouched();
-      this.cdr.markForCheck();
-    }
-  }
-
-  /**
-   * Handles tapping the tee selector and dismisses any current validation state.
-   */
-  async onTeeSelectorTap(): Promise<void> {
-    this.dismissValidationError('teeId');
-    await this.openTeeSelector();
-  }
-
-  /**
-   * Handles tapping the date selector and dismisses any current validation state.
-   */
-  async onDateSelectorTap(): Promise<void> {
-    this.dismissValidationError('date');
-    await this.openDatePicker();
   }
 
   /**
@@ -341,96 +194,12 @@ export class AddRoundPage implements OnInit {
   }
 
   /**
-   * Returns the helper text shown beneath the save button when the form is incomplete.
-   *
-   * @returns The helper copy for the current save-button state.
-   */
-  get saveHelperText(): string {
-    return this.roundForm.valid ? '' : 'Complete all required fields';
-  }
-
-  /**
-   * Returns the currently selected course identifier.
-   *
-   * @returns The selected course ID, if one exists.
-   */
-  get selectedCourseId(): string {
-    return this.roundForm.controls.courseId.getRawValue();
-  }
-
-  /**
-   * Returns the label of the currently selected course.
-   *
-   * @returns The name of the selected course, or an empty string.
-   */
-  get selectedCourseLabel(): string {
-    const courseId = this.selectedCourseId;
-    if (!courseId) return '';
-    const course = this.courses.find((c) => c.id === courseId);
-    return course ? course.name : '';
-  }
-
-  /**
-   * Returns the name of the currently selected tee.
-   *
-   * @returns The formatted name of the selected tee, or an empty string.
-   */
-  get selectedTeeName(): string {
-    const teeId = this.roundForm.controls.teeId.getRawValue();
-    if (!teeId) return '';
-    const tee = this.tees.find((t) => t.id === teeId);
-    return tee ? tee.name : '';
-  }
-
-  /**
-   * Returns formatted tee details (rating, slope, par).
-   *
-   * @returns The tee details string or empty string if no tee is selected.
-   */
-  get selectedTeeDetails(): string {
-    const teeId = this.roundForm.controls.teeId.getRawValue();
-    if (!teeId) return '';
-    const tee = this.tees.find((t) => t.id === teeId);
-    return tee ? `${tee.rating} · ${tee.slope} · ${tee.par}` : '';
-  }
-
-  /**
-   * Returns the formatted date label used in the date field.
-   *
-   * @returns The human-readable date label shown in the trigger row.
-   */
-  get formattedDateLabel(): string {
-    const value = this.roundForm.controls.date.getRawValue();
-    if (!value) {
-      return '';
-    }
-
-    const formattedDate = this.formatDate(value);
-    return this.isToday(value) ? `${formattedDate} (Today)` : formattedDate;
-  }
-
-  /**
    * Returns whether the tee action should be disabled.
    *
    * @returns Whether the add-tee action should be unavailable.
    */
   get isAddTeeDisabled(): boolean {
     return !this.selectedCourseId;
-  }
-
-  /**
-   * Opens the date picker overlay.
-   */
-  async openDatePicker(): Promise<void> {
-    const result = await this.bottomSheetService.open(DatePickerComponent, {
-      initialDate: this.roundForm.controls.date.getRawValue(),
-    });
-
-    if (result && typeof result === 'object' && 'date' in result) {
-      this.roundForm.controls.date.setValue((result as { date: string }).date);
-      this.roundForm.controls.date.markAsTouched();
-      this.cdr.markForCheck();
-    }
   }
 
   /**
@@ -443,33 +212,6 @@ export class AddRoundPage implements OnInit {
       await this.applySelectedCourse(this.selectedCourseId, false);
     } catch {
       this.toastService.presentErrorToast('Failed to load courses.');
-    } finally {
-      this.cdr.markForCheck();
-    }
-  }
-
-  private async applySelectedCourse(courseId: string, resetTeeSelection = true): Promise<void> {
-    if (!courseId) {
-      this.tees = [];
-      this.roundForm.controls.teeId.reset('');
-      this.roundForm.controls.teeId.disable();
-      this.cdr.markForCheck();
-      return;
-    }
-
-    try {
-      const tees = await this.courseService.getTees(courseId);
-      this.tees = this.sortByName(tees);
-      this.roundForm.controls.teeId.enable();
-
-      if (resetTeeSelection || !this.tees.some((tee) => tee.id === this.roundForm.controls.teeId.getRawValue())) {
-        this.roundForm.controls.teeId.reset('');
-      }
-    } catch {
-      this.tees = [];
-      this.roundForm.controls.teeId.reset('');
-      this.roundForm.controls.teeId.disable();
-      this.toastService.presentErrorToast('Failed to load tees.');
     } finally {
       this.cdr.markForCheck();
     }
@@ -510,43 +252,5 @@ export class AddRoundPage implements OnInit {
     }
 
     return `A round on ${selectedTee.name} tee at ${selectedCourse.name} already exists for ${this.formatDate(this.roundForm.controls.date.getRawValue())}.`;
-  }
-
-  private futureDateValidator(): ValidatorFn {
-    return (control): ValidationErrors | null => {
-      const value = control.value;
-      if (!value) {
-        return null;
-      }
-
-      return value > this.getTodayIsoDate() ? { futureDate: true } : null;
-    };
-  }
-
-  private getTodayIsoDate(): string {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = `${today.getMonth() + 1}`.padStart(2, '0');
-    const day = `${today.getDate()}`.padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  }
-
-  private isToday(value: string): boolean {
-    return value === this.todayIsoDate;
-  }
-
-  private formatDate(value: string): string {
-    const [year, month, day] = value.split('-').map(Number);
-    const date = new Date(year, month - 1, day);
-
-    return new Intl.DateTimeFormat('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    }).format(date);
-  }
-
-  private sortByName<T extends { name: string }>(items: T[]): T[] {
-    return [...items].sort((a, b) => a.name.localeCompare(b.name));
   }
 }
