@@ -1,19 +1,25 @@
-<header class="flex items-center justify-between px-4 py-3 pt-10 border-b border-borders shrink-0">
-  @if (backButton) {
-    <div class="flex items-center min-w-0">
-      <button
-        type="button"
-        (click)="goBack()"
-        aria-label="Back"
-        class="bg-transparent border-none outline-none mr-2 flex items-center justify-center p-2 -ml-2 rounded-full active:bg-surface transition-colors"
-      >
-        <ng-icon name="ionChevronBack" class="text-2xl" [color]="'var(--color-alabaster-grey)'"></ng-icon>
-      </button>
-      <h1 class="text-xl font-medium text-primary-font truncate m-0">{{ title }}</h1>
-    </div>
-  } @else {
-    <h1 class="text-2xl font-medium m-0">{{ title }}</h1>
-  }
+<header class="flex flex-col px-4 border-b border-borders shrink-0">
+  <div class="flex items-center justify-between pt-10 pb-3">
+    @if (backButton) {
+      <div class="flex items-center min-w-0">
+        <button
+          type="button"
+          (click)="goBack()"
+          aria-label="Back"
+          class="bg-transparent border-none outline-none mr-2 flex items-center justify-center p-2 -ml-2 rounded-full active:bg-surface transition-colors"
+        >
+          <ng-icon name="ionChevronBack" class="text-2xl" [color]="'var(--color-alabaster-grey)'"></ng-icon>
+        </button>
+        <h1 class="text-xl font-medium text-primary-font truncate m-0">{{ title }}</h1>
+      </div>
+    } @else {
+      <h1 class="text-2xl font-medium m-0">{{ title }}</h1>
+    }
 
-  <ng-content select="[action]"></ng-content>
+    <ng-content select="[action]"></ng-content>
+  </div>
+
+  <div class="empty:hidden">
+    <ng-content select="[segmented]"></ng-content>
+  </div>
 </header>

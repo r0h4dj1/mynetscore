@@ -9,13 +9,84 @@
       <ng-icon name="ionAdd"></ng-icon>
       Add
     </button>
+
+    @if (allRounds().length > 0) {
+      <app-segmented-control
+        segmented
+        ariaLabel="Filter rounds"
+        [options]="tabOptions"
+        [selected]="activeTab()"
+        (selectedChange)="onTabChange($event)"
+      ></app-segmented-control>
+    }
   </app-page-header>
 
   <main class="flex-1 overflow-y-auto">
-    <div class="px-4 py-6 h-full">
+    @if (allRounds().length === 0) {
       <div class="flex flex-col items-center justify-center h-64 text-center px-6">
         <h2 class="text-secondary-font">No rounds recorded</h2>
       </div>
-    </div>
+    } @else {
+      <div class="space-y-3 px-4 py-6 pb-8">
+        @for (row of filteredRounds(); track row.id; let i = $index) {
+          @let counting = isCounting(row.id);
+          @let legacy = activeTab() === 'all' && isLegacy(i) && !counting;
+          <a
+            [routerLink]="['/rounds', row.id, 'edit']"
+            class="rounded-2xl p-4 flex items-center justify-between gap-4 no-underline active:scale-[0.98] transition-transform"
+            [class.bg-gradient-to-b]="counting"
+            [class.from-dark-spruce/80]="counting"
+            [class.to-carbon-black]="counting"
+            [class.ring-1]="counting"
+            [class.ring-inset]="counting"
+            [class.ring-dark-spruce]="counting"
+            [class.bg-surface]="!counting && !legacy"
+            [class.bg-graphite]="legacy"
+          >
+            <div class="flex-1 min-w-0">
+              <h3
+                class="text-base m-0 break-words"
+                [class.text-primary-font]="!legacy"
+                [class.text-secondary-font]="legacy"
+              >
+                {{ row.courseName }}
+              </h3>
+              <p class="font-light text-secondary-font text-sm m-0 mt-0.5" [class.opacity-70]="legacy">
+                {{ row.teeName }} · {{ row.date | date: 'dd MMM yyyy' : 'UTC' }}
+              </p>
+            </div>
+
+            <div class="flex items-stretch gap-3 flex-shrink-0">
+              <div class="flex flex-col justify-end items-end">
+                <span
+                  class="text-2xl leading-none"
+                  [class.text-primary-font]="!legacy"
+                  [class.text-secondary-font]="legacy"
+                >
+                  {{ row.grossScore }}
+                </span>
+                <span class="font-light text-secondary-font text-xs mt-1" [class.opacity-70]="legacy">score</span>
+              </div>
+              <div
+                class="w-px self-stretch"
+                [class.bg-borders]="!legacy"
+                [class.bg-secondary-font]="legacy"
+                [class.opacity-10]="legacy"
+              ></div>
+              <div class="flex flex-col justify-end items-end">
+                <span
+                  class="text-xl leading-none"
+                  [class.text-primary-font]="!legacy"
+                  [class.text-secondary-font]="legacy"
+                >
+                  {{ row.differential | number: '1.1-1' }}
+                </span>
+                <span class="font-light text-secondary-font text-xs mt-1" [class.opacity-70]="legacy">diff</span>
+              </div>
+            </div>
+          </a>
+        }
+      </div>
+    }
   </main>
 </div>
