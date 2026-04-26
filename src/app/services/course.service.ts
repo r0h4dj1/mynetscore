@@ -110,6 +110,16 @@ export class CourseService {
   }
 
   /**
+   * Retrieves a specific tee by its ID.
+   *
+   * @param teeId - The ID of the tee to retrieve.
+   * @returns A promise resolving to the tee, or undefined if not found.
+   */
+  async getTeeById(teeId: string): Promise<Tee | undefined> {
+    return db.tees.get(teeId);
+  }
+
+  /**
    * Adds a new tee to a specific course.
    * Throws an error if:
    * - The slope is not between WHS_LIMITS.MIN_SLOPE and WHS_LIMITS.MAX_SLOPE.

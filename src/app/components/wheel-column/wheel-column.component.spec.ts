@@ -82,21 +82,16 @@ describe('WheelColumnComponent', () => {
     const scrollToMock = vi.fn();
     if (component.scrollContainer?.nativeElement) {
       component.scrollContainer.nativeElement.scrollTo = scrollToMock;
-      // Set current scrollTop so the difference is > 1
       component.scrollContainer.nativeElement.scrollTop = 0;
     }
 
-    // Change the selected value to 3 (index 2)
     fixture.componentRef.setInput('selectedValue', 3);
     fixture.detectChanges();
 
-    // Wait for effect's setTimeout (allow time for setTimeout to run)
     await new Promise((resolve) => setTimeout(resolve, 20));
 
-    // targetScrollTop should be index 2 * 48 = 96
     expect(scrollToMock).toHaveBeenCalledWith({ top: 96, behavior: 'instant' });
 
-    // The programmatic scroll flag should be cleared after 50ms from the scrollTo execution
     expect(component['isProgrammaticScroll']).toBe(true);
     await new Promise((resolve) => setTimeout(resolve, 60));
     expect(component['isProgrammaticScroll']).toBe(false);

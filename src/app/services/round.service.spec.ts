@@ -133,4 +133,128 @@ describe('RoundService', () => {
     });
     await expect(service.findDuplicateRound('tee-1', '2026-03-12')).resolves.toBeUndefined();
   });
+
+  describe('updateRound', () => {
+    it('persists the new score, date, and tee and recomputes the differential', async () => {
+      const courseId = crypto.randomUUID();
+      await db.courses.add({ id: courseId, name: 'Pebble Beach' });
+
+      const blueTeeId = crypto.randomUUID();
+      const goldTeeId = crypto.randomUUID();
+      await db.tees.bulkAdd([
+        { id: blueTeeId, courseId, name: 'Blue', rating: 74, slope: 140, par: 72 },
+        { id: goldTeeId, courseId, name: 'Gold', rating: 70, slope: 113, par: 72 },
+      ]);
+
+      const id = await service.addRound({
+        teeId: blueTeeId,
+        date: '2026-03-10',
+        grossScore: 85,
+      });
+
+      await service.updateRound(id, {
+        teeId: goldTeeId,
+        date: '2026-04-01',
+        grossScore: 80,
+      });
+
+      const updated = await db.rounds.get(id);
+      expect(updated).toBeDefined();
+      expect(updated?.teeId).toBe(goldTeeId);
+      expect(updated?.date).toBe('2026-04-01');
+      expect(updated?.grossScore).toBe(80);
+      expect(updated?.differential).toBe(10);
+    });
+
+    it('rejects an out-of-range gross score', async () => {
+      await expect(
+        service.updateRound('any-id', {
+          teeId: 'any-tee',
+          date: '2026-03-10',
+          grossScore: ROUND_LIMITS.MAX_GROSS_SCORE + 1,
+        }),
+      ).rejects.toThrow(
+        new RegExp(`Gross score must be between ${ROUND_LIMITS.MIN_GROSS_SCORE} and ${ROUND_LIMITS.MAX_GROSS_SCORE}`),
+      );
+    });
+
+    it('rejects when the referenced tee does not exist', async () => {
+      const courseId = crypto.randomUUID();
+      await db.courses.add({ id: courseId, name: 'Course' });
+      const teeId = crypto.randomUUID();
+      await db.tees.add({ id: teeId, courseId, name: 'Blue', rating: 70, slope: 113, par: 72 });
+
+      const id = await service.addRound({ teeId, date: '2026-03-10', grossScore: 85 });
+
+      await expect(
+        service.updateRound(id, {
+          teeId: 'non-existent-tee',
+          date: '2026-03-11',
+          grossScore: 84,
+        }),
+      ).rejects.toThrow(/does not exist/);
+    });
+
+    it('rejects when the tee slope is invalid', async () => {
+      const courseId = crypto.randomUUID();
+      await db.courses.add({ id: courseId, name: 'Course' });
+      const validTeeId = crypto.randomUUID();
+      const invalidTeeId = crypto.randomUUID();
+      await db.tees.bulkAdd([
+        { id: validTeeId, courseId, name: 'Blue', rating: 70, slope: 113, par: 72 },
+        { id: invalidTeeId, courseId, name: 'Bad', rating: 70, slope: 0, par: 72 },
+      ]);
+
+      const id = await service.addRound({ teeId: validTeeId, date: '2026-03-10', grossScore: 85 });
+
+      await expect(
+        service.updateRound(id, {
+          teeId: invalidTeeId,
+          date: '2026-03-11',
+          grossScore: 84,
+        }),
+      ).rejects.toThrow(/Invalid tee slope/);
+    });
+  });
+
+  describe('getRound', () => {
+    it('returns the round when one exists with the given id', async () => {
+      await db.rounds.add({
+        id: 'r1',
+        teeId: 't1',
+        date: '2026-03-10',
+        grossScore: 85,
+        differential: 10,
+      });
+
+      const round = await service.getRound('r1');
+      expect(round).toBeDefined();
+      expect(round?.id).toBe('r1');
+      expect(round?.grossScore).toBe(85);
+    });
+
+    it('returns undefined when no round matches the id', async () => {
+      await expect(service.getRound('does-not-exist')).resolves.toBeUndefined();
+    });
+  });
+
+  describe('deleteRound', () => {
+    it('removes the round from the database', async () => {
+      await db.rounds.add({
+        id: 'r1',
+        teeId: 't1',
+        date: '2026-03-10',
+        grossScore: 85,
+        differential: 10,
+      });
+
+      await service.deleteRound('r1');
+
+      await expect(db.rounds.get('r1')).resolves.toBeUndefined();
+    });
+
+    it('does not throw when deleting a non-existent round', async () => {
+      await expect(service.deleteRound('does-not-exist')).resolves.toBeUndefined();
+    });
+  });
 });

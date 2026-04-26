@@ -64,6 +64,23 @@ describe('CourseService', () => {
     });
   });
 
+  describe('getTeeById', () => {
+    it('returns the tee when one exists with the given id', async () => {
+      const courseId = await service.addCourse('Pebble Beach');
+      const teeId = await service.addTee({ courseId, name: 'Blue', rating: 74, slope: 140, par: 72 });
+
+      const tee = await service.getTeeById(teeId);
+      expect(tee).toBeDefined();
+      expect(tee?.id).toBe(teeId);
+      expect(tee?.courseId).toBe(courseId);
+      expect(tee?.name).toBe('Blue');
+    });
+
+    it('returns undefined when no tee matches the id', async () => {
+      await expect(service.getTeeById('does-not-exist')).resolves.toBeUndefined();
+    });
+  });
+
   describe('addTee / updateTee', () => {
     it('should throw an error if the slope is invalid', async () => {
       const courseId = await service.addCourse('Any Course');
