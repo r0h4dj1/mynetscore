@@ -1,4 +1,4 @@
-# AGENTS.md
+# GEMINI.md
 
 MyNetScore is a mobile-first golf scoring app. Follow these guidelines when contributing code.
 

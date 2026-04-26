@@ -1,0 +1,18 @@
+<div role="tablist" [attr.aria-label]="ariaLabel || null" class="flex items-center gap-6">
+  @for (option of options; track option.value) {
+    <button
+      type="button"
+      role="tab"
+      [attr.aria-selected]="option.value === selected"
+      (click)="selectedChange.emit(option.value)"
+      class="relative bg-transparent border-none outline-none px-0 pb-3 text-base active:opacity-80"
+      [class.text-primary-font]="option.value === selected"
+      [class.text-secondary-font]="option.value !== selected"
+    >
+      {{ option.label }}
+      @if (option.value === selected) {
+        <span aria-hidden="true" class="absolute left-0 right-0 -bottom-px h-0.5 bg-primary"></span>
+      }
+    </button>
+  }
+</div>

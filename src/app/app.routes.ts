@@ -24,6 +24,10 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/add-round/add-round.component').then((m) => m.AddRoundPage),
       },
       {
+        path: 'rounds/:id/edit',
+        loadComponent: () => import('./pages/edit-round/edit-round.component').then((m) => m.EditRoundPage),
+      },
+      {
         path: 'courses',
         loadComponent: () => import('./pages/courses/courses.component').then((m) => m.CoursesPage),
       },

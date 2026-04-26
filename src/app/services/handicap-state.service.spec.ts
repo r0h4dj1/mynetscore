@@ -43,6 +43,24 @@ describe('HandicapStateService', () => {
     ]);
   });
 
+  it('resolves recent round course names when tee and course records exist', async () => {
+    await db.courses.add({ id: 'c1', name: 'Pebble Beach' });
+    await db.tees.add({ id: 't1', courseId: 'c1', name: 'Blue', rating: 70, slope: 113, par: 72 });
+    await db.rounds.bulkAdd([
+      { id: 'r1', teeId: 't1', date: '2026-03-01', grossScore: 90, differential: 18.4 },
+      { id: 'r2', teeId: 't1', date: '2026-03-02', grossScore: 88, differential: 16.2 },
+      { id: 'r3', teeId: 't1', date: '2026-03-03', grossScore: 86, differential: 13.5 },
+    ]);
+
+    await service.refresh();
+
+    expect(service.recentRounds()).toEqual([
+      { id: 'r3', teeId: 't1', date: '2026-03-03', grossScore: 86, differential: 13.5, courseName: 'Pebble Beach' },
+      { id: 'r2', teeId: 't1', date: '2026-03-02', grossScore: 88, differential: 16.2, courseName: 'Pebble Beach' },
+      { id: 'r1', teeId: 't1', date: '2026-03-01', grossScore: 90, differential: 18.4, courseName: 'Pebble Beach' },
+    ]);
+  });
+
   it('computes handicap index and used differentials from the most recent rounds', async () => {
     await db.tees.add({ id: 't1', courseId: 'c1', name: 'White', rating: 70, slope: 113, par: 72 });
     await db.rounds.bulkAdd([
