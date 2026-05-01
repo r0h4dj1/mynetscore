@@ -10,17 +10,6 @@ The application rejects complex cloud accounts and bloated feature sets in favor
 
 Golfers who want a dedicated, fast, and private tool to track their handicap index without relying on expensive subscriptions, constant internet connectivity, or intrusive data collection from heavy third-party apps.
 
-## Brand Identity
-
-The app's design language emphasizes clarity, speed, and focus.
-
-- **The "Net" Metaphor:** The logo features a diagonally sliced "N," symbolizing the stripping away of strokes to reveal the true "net" score.
-- **Color Palette:** Built for outdoor visibility and clear status indication.
-  - **True Obsidian (`#09090B`) / Onyx (`#131316`):** Deep backgrounds for contrast.
-  - **Championship Gold (`#FACC15`):** Primary accent for actions.
-  - **Warm White (`#FAFAF9`) / Cool Grey (`#A1A1AA`):** Highly legible typography.
-  - **Green Signal (`#22C55E`) / Ruby (`#EF4444`):** Instant visual feedback on index trends.
-
 ## Core Features & Functionality
 
 ### 1. "The Living Index" (Home Dashboard)
