@@ -22,7 +22,6 @@ MyNetScore is a mobile-first golf scoring app. Follow these guidelines when cont
 
 - Mobile-first — design for small screens first.
 - Large touch targets for outdoor on-the-course usage.
-- Use `NavigationHistoryService.pop()` for sub-page back buttons; do not hardcode `routerLink` for back navigation (breaks tab isolation).
 
 ## Testing
 

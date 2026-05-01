@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<resources>
-    <string name="app_name">mynetscore</string>
-    <string name="title_activity_main">mynetscore</string>
-    <string name="package_name">com.r0h4dj1.mynetscore</string>
-    <string name="custom_url_scheme">com.r0h4dj1.mynetscore</string>
-</resources>
