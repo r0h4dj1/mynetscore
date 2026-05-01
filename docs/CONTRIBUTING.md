@@ -32,7 +32,6 @@ Every component, function, or class should have one, and only one, reason to cha
 
 - **Mobile-First Responsive Design:** MyNetScore is a mobile application. Design and build for small screens first.
 - **Touch Interactions:** Prioritize large touch targets and frictionless interactions designed for outdoor, on-the-course usage. Ensure UI elements are easily tappable.
-- **Intra-Tab Navigation:** Use `NavigationHistoryService.pop()` for back buttons in sub-pages. Avoid hardcoded `routerLink`s for back navigation to preserve the dynamic stack and ensure tab isolation.
 
 ## 3. Testing Philosophy
 

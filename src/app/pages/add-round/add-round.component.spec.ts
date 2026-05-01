@@ -6,7 +6,6 @@ import { HandicapStateService } from '../../services/handicap-state.service';
 import { RoundService } from '../../services/round.service';
 import { ToastService } from '../../services/toast.service';
 import { BottomSheetService } from '../../services/bottom-sheet.service';
-import { NavigationHistoryService } from '../../services/navigation-history.service';
 import { iconsProvider } from '../../icons.provider';
 
 describe('AddRoundPage', () => {
@@ -28,9 +27,6 @@ describe('AddRoundPage', () => {
   };
   let bottomSheetServiceMock: {
     open: ReturnType<typeof vi.fn>;
-  };
-  let navigationHistoryServiceMock: {
-    pop: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(async () => {
@@ -56,10 +52,6 @@ describe('AddRoundPage', () => {
       open: vi.fn(),
     };
 
-    navigationHistoryServiceMock = {
-      pop: vi.fn().mockResolvedValue(true),
-    };
-
     await TestBed.configureTestingModule({
       imports: [AddRoundPage],
       providers: [
@@ -70,7 +62,6 @@ describe('AddRoundPage', () => {
         { provide: HandicapStateService, useValue: handicapStateServiceMock },
         { provide: ToastService, useValue: toastServiceMock },
         { provide: BottomSheetService, useValue: bottomSheetServiceMock },
-        { provide: NavigationHistoryService, useValue: navigationHistoryServiceMock },
       ],
     }).compileComponents();
 
