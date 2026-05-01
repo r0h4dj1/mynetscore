@@ -1,7 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
-import { NavigationHistoryService } from '../../services/navigation-history.service';
 
 /**
  * Component representing the main tabs container.
@@ -14,7 +13,6 @@ import { NavigationHistoryService } from '../../services/navigation-history.serv
   imports: [NgIcon, RouterOutlet],
 })
 export class TabsComponent {
-  private readonly navigationHistoryService = inject(NavigationHistoryService);
   private readonly router = inject(Router);
 
   /**
@@ -23,16 +21,7 @@ export class TabsComponent {
    * @param tab - The tab root path.
    */
   handleTabClick(tab: string): void {
-    const currentUrl = this.router.url;
-    const isCurrentTab = currentUrl.startsWith('/' + tab);
-
-    if (isCurrentTab) {
-      this.navigationHistoryService.clear(tab);
-      this.router.navigateByUrl('/' + tab);
-    } else {
-      const lastUrl = this.navigationHistoryService.getLastUrl(tab);
-      this.router.navigateByUrl(lastUrl);
-    }
+    this.router.navigateByUrl('/' + tab);
   }
 
   /**

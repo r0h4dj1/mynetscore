@@ -1,6 +1,6 @@
 import { booleanAttribute, ChangeDetectionStrategy, Component, inject, Input } from '@angular/core';
 import { NgIcon } from '@ng-icons/core';
-import { NavigationHistoryService } from '../../services/navigation-history.service';
+import { BackNavigationService } from '../../services/back-navigation.service';
 
 /**
  * Component representing a reusable page header.
@@ -13,7 +13,7 @@ import { NavigationHistoryService } from '../../services/navigation-history.serv
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PageHeaderComponent {
-  private readonly navigationHistoryService = inject(NavigationHistoryService);
+  private readonly backNavigation = inject(BackNavigationService);
 
   /** The title of the page header. */
   @Input() title = '';
@@ -22,9 +22,10 @@ export class PageHeaderComponent {
   @Input({ transform: booleanAttribute }) backButton = false;
 
   /**
-   * Navigates back to the previous page in history.
+   * Navigates back to the previous page, falling back to a sensible default
+   * when there is no in-app history (e.g. deep link entry).
    */
-  async goBack(): Promise<void> {
-    await this.navigationHistoryService.pop();
+  goBack(): void {
+    this.backNavigation.back();
   }
 }

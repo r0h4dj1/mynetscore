@@ -2,18 +2,18 @@
 
 ## 1. Overview
 
-MyNetScore is an offline-first, cross-platform mobile application (iOS and Android) designed as a fast, frictionless golf handicap calculator. It enables users to build a personal, local database of golf courses, tees, and rounds, and calculates their handicap index using the World Handicap System (WHS). The architecture prioritizes speed, data privacy (no cloud accounts required), and an intuitive user experience.
+MyNetScore is an offline-first, installable web app designed as a fast, frictionless golf handicap calculator. It enables users to build a personal, local database of golf courses, tees, and rounds, and calculates their handicap index using the World Handicap System (WHS). The architecture prioritizes speed, data privacy (no cloud accounts required), and an intuitive user experience.
 
 ## 2. High-Level Architecture
 
-The application follows a modern frontend-heavy mobile architecture, leveraging web technologies deployed within a native container.
+The application follows a modern frontend-heavy Progressive Web App (PWA) architecture, leveraging web technologies for both core logic and distribution.
 
 - **Presentation Layer:** Built with Angular, utilizing modern reactive state management paradigms (Signals).
 - **Styling Layer:** Tailwind CSS provides utility-first styling mapped strictly to the brand identity design tokens.
 - **Business Logic Layer:** Encapsulates the WHS mathematical engine, including the rolling 8-of-20 logic, score differential calculations, and regional rule adjustments (e.g., Golf Australia multiplier).
 - **Data Access Layer:** Uses Dexie.js for type-safe and seamless interaction with the local database.
 - **Storage Layer:** An on-device IndexedDB database handles the persistent storage of user data (Courses, Tees, Rounds).
-- **Native Bridge:** Capacitor serves as the runtime, compiling the web application into native iOS and Android binaries and providing access to native device APIs (like file system for exports).
+- **PWA Shell:** A Web App Manifest and Service Worker (@angular/service-worker) provide app-like installation, offline asset caching, and a standalone launch experience.
 
 ## 3. Technology Stack
 
@@ -23,7 +23,7 @@ The application follows a modern frontend-heavy mobile architecture, leveraging 
 - **CSS Framework:** Tailwind CSS
 - **Database:** IndexedDB
 - **Database Wrapper:** Dexie.js (TypeScript)
-- **Native Runtime:** Capacitor
+- **Service Worker:** @angular/service-worker
 - **Testing:** Vitest (Unit logic), Cypress (E2E journeys)
 - **Tooling:** ESLint, Prettier
 
@@ -39,7 +39,7 @@ The app employs a "Grow-As-You-Go" relational data model stored entirely on the 
 
 ### 4.2 Data Portability
 
-To ensure data longevity without requiring complex cloud infrastructure, the system implements manual JSON/CSV export and import mechanisms. This allows users to easily back up their database or migrate between disparate ecosystems (e.g., iOS to Android) seamlessly.
+To ensure data longevity without requiring complex cloud infrastructure, the system implements manual JSON/CSV export and import mechanisms. This allows users to easily back up their database or migrate between devices seamlessly.
 
 ## 5. Core Application Logic (WHS Engine)
 
@@ -54,7 +54,6 @@ The core of the app's utility lies in its adherence to the World Handicap System
 The UI architecture focuses on an intuitive, cascading flow designed for quick, outdoor interaction:
 
 - **The Living Index (Dashboard):** The main view is dominated by the handicap index. It employs dynamic color shifting (Green for improving, Amber/Red for worsening) and spark-line trends to convey progress at a glance.
-- **Tab-Aware Navigation:** A custom `NavigationHistoryService` tracks intra-tab history, providing predictable back-button behavior while maintaining isolation between main application tabs. This ensures that deep-linking or drilling down into a specific course details stays within its respective tab context.
 - **Cascading Inputs:** The round logging workflow uses dependent selections (selecting a Course immediately filters available Tees) to minimize friction.
 - **On-the-Fly Creation:** Users can define new Courses or Tees inline during the round logging process, avoiding workflow interruption.
 - **Visual States:** Clear status indicators (e.g., glowing dots for "counting" rounds) make complex WHS rules easily digestible for the user.
