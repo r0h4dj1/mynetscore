@@ -1,25 +1,38 @@
-import { Injector, runInInjectionContext } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import { db } from '../database/db';
 import { HandicapStateService } from './handicap-state.service';
+import { SettingsService } from './settings.service';
 import { WhsService } from './whs.service';
+
+function buildTwentyEvenRounds() {
+  return Array.from({ length: 20 }, (_, i) => ({
+    id: `r${i + 1}`,
+    teeId: 't1',
+    date: `2026-03-${(i + 1).toString().padStart(2, '0')}`,
+    grossScore: 82,
+    differential: 10,
+  }));
+}
 
 describe('HandicapStateService', () => {
   let service: HandicapStateService;
+  let settingsService: SettingsService;
 
   beforeEach(async () => {
-    const injector = Injector.create({
-      providers: [{ provide: WhsService, useClass: WhsService }],
-    });
-
-    runInInjectionContext(injector, () => {
-      service = new HandicapStateService();
-    });
-
-    await db.transaction('rw', db.courses, db.tees, db.rounds, async () => {
+    await db.transaction('rw', db.courses, db.tees, db.rounds, db.settings, async () => {
       await db.courses.clear();
       await db.tees.clear();
       await db.rounds.clear();
+      await db.settings.clear();
     });
+
+    TestBed.configureTestingModule({
+      providers: [WhsService, SettingsService, HandicapStateService],
+    });
+
+    settingsService = TestBed.inject(SettingsService);
+    await settingsService.load();
+    service = TestBed.inject(HandicapStateService);
   });
 
   it('returns an empty snapshot when there are fewer than 3 rounds', async () => {
@@ -140,22 +153,82 @@ describe('HandicapStateService', () => {
   });
 
   it('correctly identifies stable trend for small deltas', async () => {
-    // 20 rounds of 10. Index = 10
-    const rounds = Array.from({ length: 20 }, (_, i) => ({
-      id: `r${i + 1}`,
-      teeId: 't1',
-      date: `2026-03-${(i + 1).toString().padStart(2, '0')}`,
-      grossScore: 82,
-      differential: 10,
-    }));
-    await db.rounds.bulkAdd(rounds);
+    await db.rounds.bulkAdd(buildTwentyEvenRounds());
     await service.refresh();
     expect(service.handicapIndex()).toBe(10);
 
-    // Add 21st round: 9.2. New lowest 8: seven 10.0s, one 9.2. Avg = 9.9. Delta = -0.1 (stable)
     await db.rounds.add({ id: 'r21', teeId: 't1', date: '2026-04-01', grossScore: 81, differential: 9.2 });
     await service.refresh();
     expect(service.handicapIndex()).toBe(9.9);
     expect(service.trend()).toBe('stable');
+  });
+
+  it('applies the Golf Australia multiplier after the region is switched', async () => {
+    await db.rounds.bulkAdd(buildTwentyEvenRounds());
+
+    await service.refresh();
+    expect(service.handicapIndex()).toBe(10);
+
+    await settingsService.setRegion('golfAustralia');
+    await service.refresh();
+
+    expect(service.handicapIndex()).toBe(9.3);
+  });
+
+  it('resolves without throwing and retains the existing snapshot when IndexedDB fails', async () => {
+    await db.rounds.bulkAdd([
+      { id: 'r1', teeId: 't1', date: '2026-03-01', grossScore: 90, differential: 18.4 },
+      { id: 'r2', teeId: 't1', date: '2026-03-02', grossScore: 88, differential: 16.2 },
+      { id: 'r3', teeId: 't1', date: '2026-03-03', grossScore: 86, differential: 13.5 },
+    ]);
+    await service.refresh();
+    const indexBefore = service.handicapIndex();
+
+    vi.spyOn(db, 'transaction').mockRejectedValueOnce(new Error('IndexedDB unavailable'));
+
+    await expect(service.refresh()).resolves.toBeUndefined();
+    expect(service.handicapIndex()).toBe(indexBefore);
+  });
+
+  it('recomputes correctly on a subsequent refresh after a failed one', async () => {
+    vi.spyOn(db, 'transaction').mockRejectedValueOnce(new Error('IndexedDB unavailable'));
+    await service.refresh();
+
+    await db.rounds.bulkAdd([
+      { id: 'r1', teeId: 't1', date: '2026-03-01', grossScore: 90, differential: 18.4 },
+      { id: 'r2', teeId: 't1', date: '2026-03-02', grossScore: 88, differential: 16.2 },
+      { id: 'r3', teeId: 't1', date: '2026-03-03', grossScore: 86, differential: 13.5 },
+    ]);
+    await service.refresh();
+
+    expect(service.handicapIndex()).toBe(11.5);
+  });
+
+  it('keeps the index null and does not throw when the region changes with no rounds', async () => {
+    await service.refresh();
+    expect(service.handicapIndex()).toBeNull();
+
+    await settingsService.setRegion('golfAustralia');
+    await service.refresh();
+
+    expect(service.handicapIndex()).toBeNull();
+    expect(service.totalRoundsInWindow()).toBe(0);
+    expect(service.trend()).toBe('none');
+  });
+
+  it('triggers a recalculation through the constructor effect when the region changes', async () => {
+    await db.rounds.bulkAdd(buildTwentyEvenRounds());
+    await service.refresh();
+    expect(service.handicapIndex()).toBe(10);
+
+    const refreshSpy = vi.spyOn(service, 'refresh');
+
+    await settingsService.setRegion('golfAustralia');
+    TestBed.tick();
+
+    expect(refreshSpy).toHaveBeenCalled();
+    await Promise.all(refreshSpy.mock.results.map((result) => result.value));
+
+    expect(service.handicapIndex()).toBe(9.3);
   });
 });
