@@ -46,10 +46,6 @@ export class AppDB extends Dexie {
       rounds: 'id, teeId, date',
       settings: 'key',
     });
-
-    this.on('populate', async () => {
-      await this.settings.add({ key: 'region', value: 'standard' });
-    });
   }
 }
 
