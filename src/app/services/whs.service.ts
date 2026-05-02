@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { WHS_LIMITS } from '../constants/whs.constants';
+import { GOLF_AUSTRALIA_MULTIPLIER, WHS_LIMITS } from '../constants/whs.constants';
 
 export type HandicapTrend = 'improving' | 'worsening' | 'stable';
 
@@ -73,7 +73,7 @@ export class WhsService {
     let average = sum / lowestDifferentials.length;
 
     if (isGolfAustralia) {
-      average *= 0.93;
+      average *= GOLF_AUSTRALIA_MULTIPLIER;
     }
 
     const index = average + adjustment;

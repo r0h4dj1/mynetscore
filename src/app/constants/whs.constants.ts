@@ -19,6 +19,11 @@ export const WHS_LIMITS = {
 } as const;
 
 /**
+ * Golf Australia handicap adjustment multiplier.
+ */
+export const GOLF_AUSTRALIA_MULTIPLIER = 0.93;
+
+/**
  * Shared round-entry score limits.
  */
 export const ROUND_LIMITS = {
