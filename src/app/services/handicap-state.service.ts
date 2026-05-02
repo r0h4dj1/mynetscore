@@ -1,5 +1,6 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { Injectable, computed, effect, inject, signal } from '@angular/core';
 import { db, Round, Tee, Course } from '../database/db';
+import { SettingsService } from './settings.service';
 import { WhsService } from './whs.service';
 
 export interface RecentRoundDisplay extends Round {
@@ -27,6 +28,8 @@ export interface HandicapStateSnapshot {
 })
 export class HandicapStateService {
   private readonly whsService = inject(WhsService);
+  private readonly settingsService = inject(SettingsService);
+  private refreshChain: Promise<void> = Promise.resolve();
   private readonly snapshotState = signal<HandicapStateSnapshot>({
     handicapIndex: null,
     totalRoundsInWindow: 0,
@@ -47,10 +50,25 @@ export class HandicapStateService {
   readonly trend = computed(() => this.snapshotState().trend);
   readonly recentRounds = computed(() => this.snapshotState().recentRounds);
 
+  constructor() {
+    effect(() => {
+      // Read the signal to track it as a dependency for this effect
+      this.settingsService.region();
+      void this.refresh();
+    });
+  }
+
   /**
    * Reloads persisted rounds and recomputes the current handicap snapshot.
+   *
+   * @returns A promise that resolves when the snapshot refresh completes.
    */
-  async refresh(): Promise<void> {
+  refresh(): Promise<void> {
+    this.refreshChain = this.refreshChain.then(() => this.runRefresh());
+    return this.refreshChain;
+  }
+
+  private async runRefresh(): Promise<void> {
     const snapshot = await db.transaction('r', [db.rounds, db.tees, db.courses], async () => {
       const [recent21Rounds, totalRounds, teeKeys] = await Promise.all([
         db.rounds.orderBy('date').reverse().limit(21).toArray(),
@@ -63,12 +81,13 @@ export class HandicapStateService {
       const usedRounds = this.whsService.getCountingRounds(recentRounds);
       const usedRoundIds = usedRounds.map((round) => round.id);
       const usedDifferentials = usedRounds.map((round) => round.differential);
-      const currentIndex = this.whsService.calculateHandicapIndex(recentDifferentials);
+      const isGolfAustralia = this.settingsService.region() === 'golfAustralia';
+      const currentIndex = this.whsService.calculateHandicapIndex(recentDifferentials, isGolfAustralia);
 
       let trend: 'improving' | 'worsening' | 'stable' | 'none' = 'none';
       if (recent21Rounds.length > 1) {
         const previousDifferentials = recent21Rounds.slice(1, 21).map((round) => round.differential);
-        const previousIndex = this.whsService.calculateHandicapIndex(previousDifferentials);
+        const previousIndex = this.whsService.calculateHandicapIndex(previousDifferentials, isGolfAustralia);
 
         if (currentIndex !== null && previousIndex !== null) {
           trend = this.whsService.determineTrend(currentIndex, previousIndex);
