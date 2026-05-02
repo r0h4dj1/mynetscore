@@ -10,17 +10,24 @@ import { db } from '../database/db';
 })
 export class SettingsService {
   private readonly regionSignal = signal<Region>('standard');
+  private writeChain: Promise<void> = Promise.resolve();
 
   readonly region = this.regionSignal.asReadonly();
 
   /**
    * Persists the selected region and mirrors it into the reactive signal.
+   * Writes are serialized so concurrent calls always reflect call order in the DB.
    *
    * @param region - The regional ruleset to apply.
    */
   async setRegion(region: Region): Promise<void> {
     this.regionSignal.set(region);
-    await db.settings.put({ key: 'region', value: region });
+    const write = this.writeChain.then(() => db.settings.put({ key: 'region', value: region }));
+    this.writeChain = write.then(
+      () => undefined,
+      () => undefined,
+    );
+    await write;
   }
 
   /**
