@@ -28,7 +28,11 @@ export class SettingsService {
    * This is called during app initialization to ensure the region is ready before use.
    */
   async load(): Promise<void> {
-    const storedRegion = (await db.settings.get('region'))?.value;
-    this.regionSignal.set(isRegion(storedRegion) ? storedRegion : 'standard');
+    try {
+      const storedRegion = (await db.settings.get('region'))?.value;
+      this.regionSignal.set(isRegion(storedRegion) ? storedRegion : 'standard');
+    } catch {
+      this.regionSignal.set('standard');
+    }
   }
 }

@@ -65,6 +65,13 @@ describe('SettingsService', () => {
     expect(service.region()).toBe('standard');
   });
 
+  it('falls back to standard when IndexedDB throws', async () => {
+    vi.spyOn(db.settings, 'get').mockRejectedValue(new Error('IndexedDB unavailable'));
+
+    await expect(service.load()).resolves.toBeUndefined();
+    expect(service.region()).toBe('standard');
+  });
+
   it('restores the persisted region when the service is reinstantiated', async () => {
     await service.load();
     await service.setRegion('golfAustralia');
