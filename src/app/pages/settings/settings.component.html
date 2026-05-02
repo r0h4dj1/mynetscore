@@ -8,31 +8,33 @@
       </h2>
 
       <div
-        role="radiogroup"
         aria-labelledby="region-group-label"
         class="bg-surface rounded-2xl border border-borders divide-y divide-borders overflow-hidden"
       >
         @for (option of options; track option.value) {
           @let isSelected = region() === option.value;
-          <button
-            type="button"
-            role="radio"
-            aria-checked="false"
-            [attr.aria-checked]="isSelected"
-            (click)="onRegionChange(option.value)"
+          <label
             class="w-full flex items-center justify-between px-4 pt-4 pb-4 first:pb-3 last:pt-3 bg-transparent border-none outline-none text-left active:bg-graphite/40 transition-colors cursor-pointer"
           >
             <span class="text-primary-font">{{ option.label }}</span>
+            <input
+              type="radio"
+              name="region"
+              class="sr-only"
+              [checked]="isSelected"
+              (change)="onRegionChange(option.value)"
+            />
             <span
               class="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0"
               [class.border-primary]="isSelected"
               [class.border-alabaster-grey]="!isSelected"
+              aria-hidden="true"
             >
               @if (isSelected) {
                 <span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
               }
             </span>
-          </button>
+          </label>
         }
       </div>
     </section>

@@ -12,5 +12,6 @@ export type Region = (typeof REGIONS)[number];
  * @returns True when the value matches a supported region.
  */
 export function isRegion(value: string | undefined): value is Region {
-  return REGIONS.some((region) => region === value);
+  const supportedRegions: readonly string[] = REGIONS;
+  return typeof value === 'string' && supportedRegions.includes(value);
 }

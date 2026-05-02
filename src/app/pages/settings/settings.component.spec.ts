@@ -42,37 +42,37 @@ describe('SettingsPage', () => {
     fixture.detectChanges();
   });
 
-  function getRadios(): HTMLButtonElement[] {
-    return Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('button[role="radio"]'));
+  function getRadioInputs(): HTMLInputElement[] {
+    return Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('input[type="radio"][name="region"]'));
   }
 
   it('renders both region options with their labels', () => {
-    const radios = getRadios();
-    expect(radios.length).toBe(2);
-    expect(radios[0].textContent).toContain('Standard WHS');
-    expect(radios[1].textContent).toContain('Golf Australia');
+    const radioInputs = getRadioInputs();
+    expect(radioInputs.length).toBe(2);
+    expect(radioInputs[0].parentElement?.textContent).toContain('Standard WHS');
+    expect(radioInputs[1].parentElement?.textContent).toContain('Golf Australia');
   });
 
   it('preselects the currently persisted region', () => {
     regionSignal.set('golfAustralia');
     fixture.detectChanges();
 
-    const radios = getRadios();
-    expect(radios[0].getAttribute('aria-checked')).toBe('false');
-    expect(radios[1].getAttribute('aria-checked')).toBe('true');
+    const radioInputs = getRadioInputs();
+    expect(radioInputs[0].checked).toBe(false);
+    expect(radioInputs[1].checked).toBe(true);
   });
 
   it('persists the region when the user picks a different option', async () => {
-    const radios = getRadios();
-    radios[1].click();
+    const radioInputs = getRadioInputs();
+    radioInputs[1].click();
     await fixture.whenStable();
 
     expect(setRegionMock).toHaveBeenCalledWith('golfAustralia');
   });
 
   it('does not persist when the user taps the already-selected option', async () => {
-    const radios = getRadios();
-    radios[0].click();
+    const radioInputs = getRadioInputs();
+    radioInputs[0].click();
     await fixture.whenStable();
 
     expect(setRegionMock).not.toHaveBeenCalled();
