@@ -69,6 +69,14 @@ export class HandicapStateService {
   }
 
   private async runRefresh(): Promise<void> {
+    try {
+      await this.doRefresh();
+    } catch {
+      // Retain the existing snapshot; the chain must not reject or it poisons all future refreshes.
+    }
+  }
+
+  private async doRefresh(): Promise<void> {
     const snapshot = await db.transaction('r', [db.rounds, db.tees, db.courses], async () => {
       const [recent21Rounds, totalRounds, teeKeys] = await Promise.all([
         db.rounds.orderBy('date').reverse().limit(21).toArray(),

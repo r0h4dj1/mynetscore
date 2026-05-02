@@ -175,6 +175,35 @@ describe('HandicapStateService', () => {
     expect(service.handicapIndex()).toBe(9.3);
   });
 
+  it('resolves without throwing and retains the existing snapshot when IndexedDB fails', async () => {
+    await db.rounds.bulkAdd([
+      { id: 'r1', teeId: 't1', date: '2026-03-01', grossScore: 90, differential: 18.4 },
+      { id: 'r2', teeId: 't1', date: '2026-03-02', grossScore: 88, differential: 16.2 },
+      { id: 'r3', teeId: 't1', date: '2026-03-03', grossScore: 86, differential: 13.5 },
+    ]);
+    await service.refresh();
+    const indexBefore = service.handicapIndex();
+
+    vi.spyOn(db, 'transaction').mockRejectedValueOnce(new Error('IndexedDB unavailable'));
+
+    await expect(service.refresh()).resolves.toBeUndefined();
+    expect(service.handicapIndex()).toBe(indexBefore);
+  });
+
+  it('recomputes correctly on a subsequent refresh after a failed one', async () => {
+    vi.spyOn(db, 'transaction').mockRejectedValueOnce(new Error('IndexedDB unavailable'));
+    await service.refresh();
+
+    await db.rounds.bulkAdd([
+      { id: 'r1', teeId: 't1', date: '2026-03-01', grossScore: 90, differential: 18.4 },
+      { id: 'r2', teeId: 't1', date: '2026-03-02', grossScore: 88, differential: 16.2 },
+      { id: 'r3', teeId: 't1', date: '2026-03-03', grossScore: 86, differential: 13.5 },
+    ]);
+    await service.refresh();
+
+    expect(service.handicapIndex()).toBe(11.5);
+  });
+
   it('keeps the index null and does not throw when the region changes with no rounds', async () => {
     await service.refresh();
     expect(service.handicapIndex()).toBeNull();
