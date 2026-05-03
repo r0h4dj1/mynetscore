@@ -51,12 +51,16 @@
     </div>
 
     <div class="grid grid-cols-2 gap-3 min-[380px]:gap-4 shrink-0 py-4">
-      <div class="bg-surface rounded-2xl p-3 min-[380px]:p-4 flex flex-col items-center justify-center shadow-sm">
-        <span class="text-xl min-[380px]:text-2xl font-bold text-primary-font">{{ totalRounds() }}</span>
+      <div
+        class="bg-surface rounded-2xl px-3 py-2.5 min-[380px]:px-4 min-[380px]:py-3 flex flex-col items-center justify-center shadow-sm"
+      >
+        <span class="text-lg min-[380px]:text-xl font-medium text-primary-font">{{ totalRounds() }}</span>
         <span class="text-secondary-font text-xs min-[380px]:text-sm mt-1">Rounds</span>
       </div>
-      <div class="bg-surface rounded-2xl p-3 min-[380px]:p-4 flex flex-col items-center justify-center shadow-sm">
-        <span class="text-xl min-[380px]:text-2xl font-bold text-primary-font">{{ totalCoursesPlayed() }}</span>
+      <div
+        class="bg-surface rounded-2xl px-3 py-2.5 min-[380px]:px-4 min-[380px]:py-3 flex flex-col items-center justify-center shadow-sm"
+      >
+        <span class="text-lg min-[380px]:text-xl font-medium text-primary-font">{{ totalCoursesPlayed() }}</span>
         <span class="text-secondary-font text-xs min-[380px]:text-sm mt-1">Courses</span>
       </div>
     </div>

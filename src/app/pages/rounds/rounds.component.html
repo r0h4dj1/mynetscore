@@ -69,7 +69,8 @@
               </div>
               <div
                 class="w-px self-stretch"
-                [class.bg-borders]="!legacy"
+                [class.bg-dark-spruce]="counting"
+                [class.bg-borders]="!counting && !legacy"
                 [class.bg-secondary-font]="legacy"
                 [class.opacity-10]="legacy"
               ></div>
