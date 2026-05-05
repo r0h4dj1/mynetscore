@@ -13,6 +13,10 @@ describe('WhsService', () => {
       expect(service.calculateDifferential(72, 72, 113)).toBe(0);
       expect(service.calculateDifferential(100, 68.5, 120)).toBe(29.7);
     });
+
+    it('should not pre-round boundary values before rounding to one decimal place', () => {
+      expect(service.calculateDifferential(60, 50, 55)).toBe(20.5);
+    });
   });
 
   describe('calculateHandicapIndex', () => {
@@ -25,6 +29,10 @@ describe('WhsService', () => {
     it('should apply provisional calculation adjustments for 3 to 19 rounds', () => {
       expect(service.calculateHandicapIndex([15, 12, 20])).toBe(10);
       expect(service.calculateHandicapIndex([15, 12, 20, 18, 14])).toBe(12);
+    });
+
+    it('should round provisional index boundary values with the precision guard', () => {
+      expect(service.calculateHandicapIndex([5.2, 16.9, 17, 18, 19, 20])).toBe(10.1);
     });
 
     it('should calculate the index using the lowest 8 of the most recent 20 rounds', () => {

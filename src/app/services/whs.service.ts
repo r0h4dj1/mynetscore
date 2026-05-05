@@ -46,9 +46,7 @@ export class WhsService {
    */
   calculateDifferential(score: number, rating: number, slope: number): number {
     const rawDifferential = (score - rating) * (WHS_LIMITS.STANDARD_SLOPE / slope);
-    // Round to 2dp first to eliminate floating-point noise, then to 1dp
-    const roundedTo2dp = Math.round(rawDifferential * 100) / 100;
-    return Math.round(roundedTo2dp * 10) / 10;
+    return this.roundToNearestTenth(rawDifferential);
   }
 
   /**
@@ -78,7 +76,7 @@ export class WhsService {
 
     const index = average + adjustment;
 
-    return Math.round(index * 10) / 10;
+    return this.roundToNearestTenth(index);
   }
 
   /**
@@ -150,5 +148,9 @@ export class WhsService {
     }
 
     return this.PROVISIONAL_TABLE[numRounds];
+  }
+
+  private roundToNearestTenth(value: number): number {
+    return Math.round(Number((value * 10).toPrecision(15))) / 10;
   }
 }
