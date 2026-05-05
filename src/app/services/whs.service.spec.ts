@@ -13,6 +13,10 @@ describe('WhsService', () => {
       expect(service.calculateDifferential(72, 72, 113)).toBe(0);
       expect(service.calculateDifferential(100, 68.5, 120)).toBe(29.7);
     });
+
+    it('should not pre-round boundary values before rounding to one decimal place', () => {
+      expect(service.calculateDifferential(60, 50, 55)).toBe(20.5);
+    });
   });
 
   describe('calculateHandicapIndex', () => {
