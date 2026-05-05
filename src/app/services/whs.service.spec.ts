@@ -31,6 +31,10 @@ describe('WhsService', () => {
       expect(service.calculateHandicapIndex([15, 12, 20, 18, 14])).toBe(12);
     });
 
+    it('should round provisional index boundary values with the precision guard', () => {
+      expect(service.calculateHandicapIndex([5.2, 16.9, 17, 18, 19, 20])).toBe(10.1);
+    });
+
     it('should calculate the index using the lowest 8 of the most recent 20 rounds', () => {
       const rounds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
       expect(service.calculateHandicapIndex(rounds)).toBe(4.5);
