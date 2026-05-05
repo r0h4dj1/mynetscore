@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component, Input, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Tee } from '../../database/db';
-import { ValidationStatusDirective } from '../../directives/validation-status.directive';
 import { WHS_LIMITS } from '../../constants/whs.constants';
 import { CourseService } from '../../services/course.service';
 import { ToastService } from '../../services/toast.service';
 import { BottomSheetService } from '../../services/bottom-sheet.service';
+import { TeeFormComponent } from '../tee-form/tee-form.component';
 
 /**
  * Reusable bottom-sheet for adding a tee to an existing course.
@@ -14,7 +14,7 @@ import { BottomSheetService } from '../../services/bottom-sheet.service';
   selector: 'app-add-tee-modal',
   templateUrl: './add-tee-modal.component.html',
   standalone: true,
-  imports: [ReactiveFormsModule, ValidationStatusDirective],
+  imports: [ReactiveFormsModule, TeeFormComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddTeeModalComponent {

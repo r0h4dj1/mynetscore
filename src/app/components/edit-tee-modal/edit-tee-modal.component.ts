@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Tee } from '../../database/db';
 import { WHS_LIMITS } from '../../constants/whs.constants';
 import { BottomSheetService } from '../../services/bottom-sheet.service';
+import { TeeFormComponent } from '../tee-form/tee-form.component';
 
 export interface EditTeeModalResult {
   action: 'save' | 'delete';
@@ -19,7 +20,7 @@ export interface EditTeeModalResult {
   selector: 'app-edit-tee-modal',
   templateUrl: './edit-tee-modal.component.html',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, TeeFormComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EditTeeModalComponent implements OnInit {
