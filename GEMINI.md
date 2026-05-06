@@ -30,4 +30,4 @@ MyNetScore is a mobile-first golf scoring app. Follow these guidelines when cont
 
 ## Scripts
 
-- Use `npm run test` or `ng test --watch=false` for running unit tests
+- Use `npm test` for all tests and `npm test -- --include <path>` for specific files.

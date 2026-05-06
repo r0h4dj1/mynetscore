@@ -5,51 +5,7 @@
 
   <div class="flex-1 px-4 py-6">
     <form [formGroup]="editTeeForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-6">
-      <div>
-        <label class="block text-xs font-light text-secondary-font mb-2" for="editTeeName">Tee name</label>
-        <input
-          id="editTeeName"
-          formControlName="teeName"
-          class="w-full bg-background border border-borders rounded-xl px-4 py-3 text-base text-primary-font focus:outline-none focus:border-primary-light box-border"
-          type="text"
-        />
-      </div>
-
-      <div class="flex gap-3">
-        <div class="flex-1 min-w-0">
-          <label class="block text-xs font-light text-secondary-font mb-2" for="editRating">Course rating</label>
-          <input
-            id="editRating"
-            formControlName="rating"
-            class="w-full bg-background border border-borders rounded-xl px-3 py-3 text-base text-primary-font focus:outline-none focus:border-primary-light box-border"
-            type="number"
-            inputmode="decimal"
-            step="0.1"
-          />
-        </div>
-
-        <div class="flex-1 min-w-0">
-          <label class="block text-xs font-light text-secondary-font mb-2" for="editSlope">Slope rating</label>
-          <input
-            id="editSlope"
-            formControlName="slope"
-            class="w-full bg-background border border-borders rounded-xl px-3 py-3 text-base text-primary-font focus:outline-none focus:border-primary-light box-border"
-            type="number"
-            inputmode="numeric"
-          />
-        </div>
-
-        <div class="flex-1 min-w-0">
-          <label class="block text-xs font-light text-secondary-font mb-2" for="editPar">Par</label>
-          <input
-            id="editPar"
-            formControlName="par"
-            class="w-full bg-background border border-borders rounded-xl px-3 py-3 text-base text-primary-font focus:outline-none focus:border-primary-light box-border"
-            type="number"
-            inputmode="numeric"
-          />
-        </div>
-      </div>
+      <app-tee-form [parentForm]="editTeeForm" [submitCount]="editTeeSubmitCount" idPrefix="edit"></app-tee-form>
 
       <div class="flex flex-col gap-3 pt-2">
         <button
