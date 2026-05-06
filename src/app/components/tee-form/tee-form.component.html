@@ -1,8 +1,8 @@
 <div [formGroup]="parentForm" class="flex flex-col gap-6">
   <div>
-    <label class="block text-xs font-light text-secondary-font mb-2" for="teeName">Tee name</label>
+    <label class="block text-xs font-light text-secondary-font mb-2" [attr.for]="fieldId('teeName')">Tee name</label>
     <input
-      id="teeName"
+      [id]="fieldId('teeName')"
       formControlName="teeName"
       class="w-full bg-background border border-borders rounded-xl px-4 py-3 text-base text-primary-font focus:outline-none focus:border-primary-light box-border"
       [appValidationStatus]="submitCount"
@@ -12,9 +12,11 @@
 
   <div class="flex gap-3">
     <div class="flex-1 min-w-0">
-      <label class="block text-xs font-light text-secondary-font mb-2" for="rating">Course rating</label>
+      <label class="block text-xs font-light text-secondary-font mb-2" [attr.for]="fieldId('rating')"
+        >Course rating</label
+      >
       <input
-        id="rating"
+        [id]="fieldId('rating')"
         formControlName="rating"
         class="w-full bg-background border border-borders rounded-xl px-3 py-3 text-base text-primary-font focus:outline-none focus:border-primary-light box-border"
         [appValidationStatus]="submitCount"
@@ -25,9 +27,11 @@
     </div>
 
     <div class="flex-1 min-w-0">
-      <label class="block text-xs font-light text-secondary-font mb-2" for="slope">Slope rating</label>
+      <label class="block text-xs font-light text-secondary-font mb-2" [attr.for]="fieldId('slope')"
+        >Slope rating</label
+      >
       <input
-        id="slope"
+        [id]="fieldId('slope')"
         formControlName="slope"
         class="w-full bg-background border border-borders rounded-xl px-3 py-3 text-base text-primary-font focus:outline-none focus:border-primary-light box-border"
         [appValidationStatus]="submitCount"
@@ -37,9 +41,9 @@
     </div>
 
     <div class="flex-1 min-w-0">
-      <label class="block text-xs font-light text-secondary-font mb-2" for="par">Par</label>
+      <label class="block text-xs font-light text-secondary-font mb-2" [attr.for]="fieldId('par')">Par</label>
       <input
-        id="par"
+        [id]="fieldId('par')"
         formControlName="par"
         class="w-full bg-background border border-borders rounded-xl px-3 py-3 text-base text-primary-font focus:outline-none focus:border-primary-light box-border"
         [appValidationStatus]="submitCount"
