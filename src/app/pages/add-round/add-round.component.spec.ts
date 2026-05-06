@@ -71,6 +71,25 @@ describe('AddRoundPage', () => {
     fixture.detectChanges();
   });
 
+  const arrangePendingDuplicate = (): void => {
+    component.courses = [{ id: 'course-1', name: 'Augusta National Golf Club' }];
+    component.tees = [{ id: 'tee-1', courseId: 'course-1', name: 'Yellow', rating: 71.8, slope: 125, par: 72 }];
+    component.roundForm.controls.teeId.enable();
+    component.roundForm.setValue({
+      courseId: 'course-1',
+      teeId: 'tee-1',
+      date: '2026-03-21',
+      grossScore: '84',
+    });
+    roundServiceMock.findDuplicateRound.mockResolvedValue({
+      id: 'round-existing',
+      teeId: 'tee-1',
+      date: '2026-03-21',
+      grossScore: 84,
+      differential: 9.8,
+    });
+  };
+
   it('loads and sorts courses alphabetically', async () => {
     courseServiceMock.getCourses.mockResolvedValue([
       { id: '2', name: 'Zebra Course' },
@@ -144,22 +163,7 @@ describe('AddRoundPage', () => {
   });
 
   it('shows a duplicate confirmation instead of saving immediately', async () => {
-    component.courses = [{ id: 'course-1', name: 'Augusta National Golf Club' }];
-    component.tees = [{ id: 'tee-1', courseId: 'course-1', name: 'Yellow', rating: 71.8, slope: 125, par: 72 }];
-    component.roundForm.controls.teeId.enable();
-    component.roundForm.setValue({
-      courseId: 'course-1',
-      teeId: 'tee-1',
-      date: '2026-03-21',
-      grossScore: '84',
-    });
-    roundServiceMock.findDuplicateRound.mockResolvedValue({
-      id: 'round-existing',
-      teeId: 'tee-1',
-      date: '2026-03-21',
-      grossScore: 84,
-      differential: 9.8,
-    });
+    arrangePendingDuplicate();
 
     await component.onSubmit();
 
@@ -169,22 +173,7 @@ describe('AddRoundPage', () => {
   });
 
   it('cancels the duplicate confirmation without saving', async () => {
-    component.courses = [{ id: 'course-1', name: 'Augusta National Golf Club' }];
-    component.tees = [{ id: 'tee-1', courseId: 'course-1', name: 'Yellow', rating: 71.8, slope: 125, par: 72 }];
-    component.roundForm.controls.teeId.enable();
-    component.roundForm.setValue({
-      courseId: 'course-1',
-      teeId: 'tee-1',
-      date: '2026-03-21',
-      grossScore: '84',
-    });
-    roundServiceMock.findDuplicateRound.mockResolvedValue({
-      id: 'round-existing',
-      teeId: 'tee-1',
-      date: '2026-03-21',
-      grossScore: 84,
-      differential: 9.8,
-    });
+    arrangePendingDuplicate();
 
     await component.onSubmit();
     component.cancelDuplicateConfirmation();

@@ -7,13 +7,13 @@ import { CourseService } from '../../services/course.service';
 import { ToastService } from '../../services/toast.service';
 import { BottomSheetService } from '../../services/bottom-sheet.service';
 import { Course, Tee } from '../../database/db';
-import { ValidationStatusDirective } from '../../directives/validation-status.directive';
 import { WHS_LIMITS } from '../../constants/whs.constants';
 import {
   EditCourseModalComponent,
   EditCourseModalResult,
 } from '../../components/edit-course-modal/edit-course-modal.component';
 import { EditTeeModalComponent, EditTeeModalResult } from '../../components/edit-tee-modal/edit-tee-modal.component';
+import { TeeFormComponent } from '../../components/tee-form/tee-form.component';
 
 /**
  * Component representing the course detail page.
@@ -23,7 +23,7 @@ import { EditTeeModalComponent, EditTeeModalResult } from '../../components/edit
   host: { class: 'block h-full' },
   templateUrl: './course-detail.component.html',
   standalone: true,
-  imports: [ReactiveFormsModule, NgIcon, ValidationStatusDirective, PageHeaderComponent],
+  imports: [ReactiveFormsModule, NgIcon, PageHeaderComponent, TeeFormComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CourseDetailPage implements OnInit {

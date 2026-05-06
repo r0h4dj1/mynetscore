@@ -2,14 +2,13 @@ import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { NgIcon } from '@ng-icons/core';
 import { Round } from '../../database/db';
 import { HandicapStateService } from '../../services/handicap-state.service';
 import { RoundService } from '../../services/round.service';
 
-import { ValidationStatusDirective } from '../../directives/validation-status.directive';
 import { PopUpComponent } from '../../components/pop-up/pop-up.component';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
+import { RoundFormFieldsComponent } from '../../components/round-form-fields/round-form-fields.component';
 import { RoundFormPageBase } from '../shared/round-form-page.base';
 
 /**
@@ -20,7 +19,7 @@ import { RoundFormPageBase } from '../shared/round-form-page.base';
   host: { class: 'block h-full' },
   templateUrl: './edit-round.component.html',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, NgIcon, ValidationStatusDirective, PopUpComponent, PageHeaderComponent],
+  imports: [CommonModule, ReactiveFormsModule, PopUpComponent, PageHeaderComponent, RoundFormFieldsComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EditRoundPage extends RoundFormPageBase implements OnInit {
