@@ -23,7 +23,7 @@ const FORMAT_OPTIONS: Record<FormatDateMode, Intl.DateTimeFormatOptions> = {
 })
 export class FormatDatePipe implements PipeTransform {
   /**
-   * Formats an ISO calendar date string using local calendar semantics.
+   * Pipe wrapper for {@link FormatDatePipe.format}.
    *
    * @param value - The date value in YYYY-MM-DD format.
    * @param mode - The display format to apply.

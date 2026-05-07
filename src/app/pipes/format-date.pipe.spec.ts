@@ -1,5 +1,9 @@
 import { FormatDatePipe } from './format-date.pipe';
 
+// These tests verify format correctness only. The UTC off-by-one regression (dates
+// displaying one day earlier for UTC+ users) is structural: the fix avoids new Date(string)
+// in favour of new Date(year, month - 1, day) so the date is always local midnight.
+// That invariant can only be demonstrated end-to-end in a UTC+ environment (e.g. TZ=Europe/London).
 describe('FormatDatePipe', () => {
   const pipe = new FormatDatePipe();
 
