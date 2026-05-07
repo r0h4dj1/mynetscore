@@ -15,7 +15,6 @@ const FADE_OUT_MS = 200;
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'fixed inset-x-0 top-0 z-[60] flex justify-center pointer-events-none',
-    style: 'padding-top: env(safe-area-inset-top, 0px)',
   },
   template: `
     @if (message(); as msg) {
