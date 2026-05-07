@@ -4,7 +4,7 @@
   </header>
 
   <div class="flex-1 px-4 py-6">
-    <form [formGroup]="teeForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-6">
+    <form [formGroup]="teeForm" (ngSubmit)="onSubmit()" autocomplete="off" class="flex flex-col gap-6">
       <app-tee-form [parentForm]="teeForm" [submitCount]="teeSubmitCount"></app-tee-form>
 
       <button
