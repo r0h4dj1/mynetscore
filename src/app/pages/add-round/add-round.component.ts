@@ -15,6 +15,7 @@ import { PopUpComponent } from '../../components/pop-up/pop-up.component';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
 import { RoundFormFieldsComponent } from '../../components/round-form-fields/round-form-fields.component';
 import { RoundFormPageBase } from '../shared/round-form-page.base';
+import { FormatDatePipe } from '../../pipes/format-date.pipe';
 
 interface PendingRoundPayload {
   teeId: string;
@@ -245,11 +246,12 @@ export class AddRoundPage extends RoundFormPageBase implements OnInit {
   private buildDuplicateSummary(): string {
     const selectedCourse = this.courses.find((course) => course.id === this.selectedCourseId);
     const selectedTee = this.tees.find((tee) => tee.id === this.roundForm.controls.teeId.getRawValue());
+    const formattedDate = FormatDatePipe.format(this.roundForm.controls.date.getRawValue(), 'long');
 
     if (!selectedCourse || !selectedTee) {
-      return `A round already exists for ${this.formatDate(this.roundForm.controls.date.getRawValue())}.`;
+      return `A round already exists for ${formattedDate}.`;
     }
 
-    return `A round on ${selectedTee.name} tee at ${selectedCourse.name} already exists for ${this.formatDate(this.roundForm.controls.date.getRawValue())}.`;
+    return `A round on ${selectedTee.name} tee at ${selectedCourse.name} already exists for ${formattedDate}.`;
   }
 }

@@ -1,9 +1,10 @@
 import { Component, computed, inject, Signal, OnInit } from '@angular/core';
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
 import { HandicapStateService, RecentRoundDisplay, RECENT_DISPLAY_COUNT } from '../../services/handicap-state.service';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
+import { FormatDatePipe } from '../../pipes/format-date.pipe';
 
 /**
  * Component representing the home page dashboard.
@@ -13,7 +14,7 @@ import { PageHeaderComponent } from '../../components/page-header/page-header.co
   host: { class: 'flex flex-col h-full' },
   templateUrl: './home.component.html',
   standalone: true,
-  imports: [PageHeaderComponent, NgIcon, DatePipe, DecimalPipe, RouterLink],
+  imports: [PageHeaderComponent, NgIcon, FormatDatePipe, DecimalPipe, RouterLink],
 })
 export class HomePage implements OnInit {
   private readonly handicapStateService = inject(HandicapStateService);
