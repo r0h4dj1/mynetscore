@@ -23,4 +23,11 @@ describe('FormatDatePipe', () => {
     expect(pipe.transform(undefined)).toBe('');
     expect(pipe.transform(null)).toBe('');
   });
+
+  it.each(['2026/05/03', '2026-05', '2026-May-03', '2026-02-31'])(
+    'returns the original value when %s cannot be parsed as a valid YYYY-MM-DD date',
+    (value) => {
+      expect(pipe.transform(value)).toBe(value);
+    },
+  );
 });
