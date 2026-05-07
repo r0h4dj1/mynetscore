@@ -1,8 +1,9 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
 import { PageHeaderComponent } from '../../components/page-header/page-header.component';
+import { FormatDatePipe } from '../../pipes/format-date.pipe';
 import {
   SegmentedControlComponent,
   SegmentedControlOption,
@@ -24,7 +25,7 @@ const LEGACY_INDEX_THRESHOLD = 20;
   templateUrl: './rounds.component.html',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgIcon, RouterLink, DatePipe, DecimalPipe, PageHeaderComponent, SegmentedControlComponent],
+  imports: [NgIcon, RouterLink, FormatDatePipe, DecimalPipe, PageHeaderComponent, SegmentedControlComponent],
 })
 export class RoundsPage implements OnInit {
   private readonly handicapState = inject(HandicapStateService);

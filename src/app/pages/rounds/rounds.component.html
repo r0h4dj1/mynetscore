@@ -52,7 +52,7 @@
                 {{ row.courseName }}
               </h3>
               <p class="font-light text-secondary-font text-sm m-0 mt-0.5" [class.opacity-70]="legacy">
-                {{ row.teeName }} · {{ row.date | date: 'dd MMM yyyy' : 'UTC' }}
+                {{ row.teeName }} · {{ row.date | formatDate: 'long' }}
               </p>
             </div>
 

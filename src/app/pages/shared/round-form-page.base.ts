@@ -10,6 +10,7 @@ import {
 import { BottomSheetService } from '../../services/bottom-sheet.service';
 import { CourseService } from '../../services/course.service';
 import { ToastService } from '../../services/toast.service';
+import { FormatDatePipe } from '../../pipes/format-date.pipe';
 
 export interface RoundFormValue {
   courseId: string;
@@ -244,7 +245,7 @@ export abstract class RoundFormPageBase {
       return '';
     }
 
-    const formattedDate = this.formatDate(value);
+    const formattedDate = FormatDatePipe.format(value, 'long');
     return this.isToday(value) ? `${formattedDate} (Today)` : formattedDate;
   }
 
@@ -285,17 +286,6 @@ export abstract class RoundFormPageBase {
     } finally {
       this.cdr.markForCheck();
     }
-  }
-
-  protected formatDate(value: string): string {
-    const [year, month, day] = value.split('-').map(Number);
-    const date = new Date(year, month - 1, day);
-
-    return new Intl.DateTimeFormat('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    }).format(date);
   }
 
   protected sortByName<T extends { name: string }>(items: T[]): T[] {
