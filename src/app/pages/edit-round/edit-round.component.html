@@ -3,7 +3,7 @@
 
   <main class="flex-1 overflow-y-auto">
     <div class="px-4 py-6 h-full">
-      <form [formGroup]="roundForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-8">
+      <form [formGroup]="roundForm" (ngSubmit)="onSubmit()" autocomplete="off" class="flex flex-col gap-8">
         <app-round-form-fields [host]="this"></app-round-form-fields>
 
         <div class="pb-6">

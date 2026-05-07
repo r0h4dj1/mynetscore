@@ -4,7 +4,7 @@
   </header>
 
   <div class="flex-1 px-4 py-6">
-    <form [formGroup]="courseForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-6">
+    <form [formGroup]="courseForm" (ngSubmit)="onSubmit()" autocomplete="off" class="flex flex-col gap-6">
       <div>
         <label class="block text-xs font-light text-secondary-font mb-2" for="courseName">Course name</label>
         <input
@@ -13,7 +13,6 @@
           class="w-full bg-background border border-borders rounded-xl px-4 py-3 text-base text-primary-font focus:outline-none focus:border-primary-light box-border"
           [appValidationStatus]="addCourseSubmitCount"
           type="text"
-          autocomplete="off"
         />
       </div>
 
@@ -31,7 +30,6 @@
           class="w-full bg-background border border-borders rounded-xl px-4 py-3 text-base text-primary-font focus:outline-none focus:border-primary-light box-border"
           [appValidationStatus]="addCourseSubmitCount"
           type="text"
-          autocomplete="off"
         />
       </div>
 
@@ -46,7 +44,6 @@
             type="number"
             inputmode="decimal"
             step="0.1"
-            autocomplete="off"
           />
         </div>
 
@@ -59,7 +56,6 @@
             [appValidationStatus]="addCourseSubmitCount"
             type="number"
             inputmode="numeric"
-            autocomplete="off"
           />
         </div>
 
@@ -72,7 +68,6 @@
             [appValidationStatus]="addCourseSubmitCount"
             type="number"
             inputmode="numeric"
-            autocomplete="off"
           />
         </div>
       </div>
