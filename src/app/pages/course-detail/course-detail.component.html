@@ -1,6 +1,7 @@
 <div class="flex flex-col h-full">
   <app-page-header [title]="course?.name || 'Course Details'" backButton>
     <button
+      data-testid="course-edit"
       action
       type="button"
       (click)="openEditCourseModal()"
@@ -27,6 +28,7 @@
           <div class="space-y-3">
             @for (tee of tees; track tee.id) {
               <button
+                data-testid="course-tee-row"
                 type="button"
                 (click)="openEditTeeModal(tee)"
                 class="w-full text-left bg-surface rounded-2xl p-4 active:scale-[0.98] transition-transform border-none outline-none"
@@ -50,6 +52,7 @@
             <app-tee-form [parentForm]="teeForm" [submitCount]="teeSubmitCount"></app-tee-form>
 
             <button
+              data-testid="course-add-tee-submit"
               type="submit"
               class="mt-2 w-full h-14 rounded-lg font-medium text-lg bg-primary text-onyx border-none outline-none active:scale-[0.98] transition-transform flex items-center justify-center"
             >

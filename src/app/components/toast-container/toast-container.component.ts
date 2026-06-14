@@ -20,6 +20,7 @@ const FADE_OUT_MS = 200;
     @if (message(); as msg) {
       <div
         #toastEl
+        data-testid="toast"
         class="toast"
         (pointerdown)="onPointerDown($event)"
         (pointermove)="onPointerMove($event)"

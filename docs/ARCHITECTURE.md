@@ -2,7 +2,7 @@
 
 ## 1. Overview
 
-MyNetScore is an offline-first, installable web app designed as a fast, frictionless golf handicap calculator. It enables users to build a personal, local database of golf courses, tees, and rounds, and calculates their handicap index using the World Handicap System (WHS). The architecture prioritizes speed, data privacy (no cloud accounts required), and an intuitive user experience.
+MyNetScore is an offline-first, installable web app designed as a fast, frictionless golf handicap calculator. It enables users to build a personal, local database of golf courses, tees, and rounds, and calculates their handicap index using the World Handicap System (WHS). The architecture prioritizes speed, local data storage (no cloud accounts required), and an intuitive user experience.
 
 ## 2. High-Level Architecture
 

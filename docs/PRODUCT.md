@@ -8,7 +8,7 @@ The application rejects complex cloud accounts and bloated feature sets in favor
 
 ## Target Audience
 
-Golfers who want a dedicated, fast, and private tool to track their handicap index without relying on expensive subscriptions, constant internet connectivity, or intrusive data collection from heavy third-party apps.
+Golfers who want a dedicated, fast, and independent tool to track their handicap index without relying on expensive subscriptions, constant internet connectivity, or third-party account requirements.
 
 ## Core Features & Functionality
 
@@ -31,7 +31,7 @@ Logging a round is designed to be as fast as possible, utilizing a clean interfa
 
 ### 3. Personal Offline Database
 
-The app values user privacy and speed by storing all data locally on the device.
+The app optimizes for speed and offline reliability by storing all data locally on the device.
 
 - **Grow-As-You-Go:** The app starts empty. Users manually input course and tee data only once. The app saves this, making future rounds at those locations instantaneous to log.
 - **Relational Structure:** "Courses" (locations) are separated from "Tees" (specific yardages/ratings). Multiple tees can belong to a single course.

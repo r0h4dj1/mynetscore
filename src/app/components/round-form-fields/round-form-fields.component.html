@@ -7,6 +7,7 @@
 
     <div class="relative">
       <button
+        data-testid="round-course-select"
         type="button"
         id="courseId"
         class="w-full appearance-none bg-surface border text-left rounded-xl px-4 py-3 pr-12 text-base focus:outline-none box-border transition-colors active:bg-background"
@@ -36,6 +37,7 @@
 
     <div class="relative">
       <button
+        data-testid="round-tee-select"
         type="button"
         id="teeId"
         class="w-full appearance-none border text-left rounded-xl px-4 py-3 pr-12 text-base focus:outline-none box-border transition-colors"
@@ -73,6 +75,7 @@
   <section>
     <label class="block text-xs font-light text-secondary-font mb-2" for="date">Date played</label>
     <button
+      data-testid="round-date-select"
       type="button"
       id="date"
       class="relative w-full bg-surface border rounded-xl px-4 py-3 pr-12 text-left text-base text-primary-font focus:outline-none box-border"
@@ -94,6 +97,7 @@
   <section>
     <label class="block text-xs font-light text-secondary-font mb-2" for="grossScore">Gross score</label>
     <input
+      data-testid="round-gross-score"
       id="grossScore"
       formControlName="grossScore"
       type="number"

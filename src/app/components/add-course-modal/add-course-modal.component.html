@@ -8,6 +8,7 @@
       <div>
         <label class="block text-xs font-light text-secondary-font mb-2" for="courseName">Course name</label>
         <input
+          data-testid="add-course-name"
           id="courseName"
           formControlName="courseName"
           class="w-full bg-background border border-borders rounded-xl px-4 py-3 text-base text-primary-font focus:outline-none focus:border-primary-light box-border"
@@ -25,6 +26,7 @@
       <div>
         <label class="block text-xs font-light text-secondary-font mb-2" for="teeName">Tee name</label>
         <input
+          data-testid="add-course-tee-name"
           id="teeName"
           formControlName="teeName"
           class="w-full bg-background border border-borders rounded-xl px-4 py-3 text-base text-primary-font focus:outline-none focus:border-primary-light box-border"
@@ -37,6 +39,7 @@
         <div class="flex-1 min-w-0">
           <label class="block text-xs font-light text-secondary-font mb-2" for="rating">Course rating</label>
           <input
+            data-testid="add-course-rating"
             id="rating"
             formControlName="rating"
             class="w-full bg-background border border-borders rounded-xl px-3 py-3 text-base text-primary-font focus:outline-none focus:border-primary-light box-border"
@@ -50,6 +53,7 @@
         <div class="flex-1 min-w-0">
           <label class="block text-xs font-light text-secondary-font mb-2" for="slope">Slope rating</label>
           <input
+            data-testid="add-course-slope"
             id="slope"
             formControlName="slope"
             class="w-full bg-background border border-borders rounded-xl px-3 py-3 text-base text-primary-font focus:outline-none focus:border-primary-light box-border"
@@ -62,6 +66,7 @@
         <div class="flex-1 min-w-0">
           <label class="block text-xs font-light text-secondary-font mb-2" for="par">Par</label>
           <input
+            data-testid="add-course-par"
             id="par"
             formControlName="par"
             class="w-full bg-background border border-borders rounded-xl px-3 py-3 text-base text-primary-font focus:outline-none focus:border-primary-light box-border"
@@ -73,6 +78,7 @@
       </div>
 
       <button
+        data-testid="add-course-submit"
         type="submit"
         class="flex items-center justify-center gap-1 px-4 py-2 rounded-lg bg-primary text-onyx text-lg font-medium border-none outline-none h-14 active:scale-[0.98] transition-transform"
       >

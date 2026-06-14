@@ -8,6 +8,7 @@
 
         <div class="pb-6">
           <button
+            data-testid="round-save"
             type="submit"
             class="w-full h-14 rounded-lg font-medium text-lg border-none outline-none active:scale-[0.98] transition-transform flex items-center justify-center"
             [class.bg-primary]="roundForm.valid && !isSaving && !isDeleting"
@@ -20,6 +21,7 @@
           </button>
 
           <button
+            data-testid="round-delete"
             type="button"
             (click)="askDelete()"
             [disabled]="isSaving || isDeleting"

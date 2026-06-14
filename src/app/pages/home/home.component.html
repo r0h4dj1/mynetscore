@@ -15,6 +15,7 @@
     <div class="flex flex-col items-center justify-center flex-1 min-h-[120px] py-4">
       @if (totalRoundsInWindow() > 0 && handicapIndex() !== null) {
         <div
+          data-testid="home-handicap-index"
           class="text-[3.75rem] min-[380px]:text-[4.5rem] font-bold leading-none tracking-tight text-primary-font shrink-0"
         >
           {{ handicapIndex() | number: '1.1-1' }}
@@ -24,11 +25,12 @@
         >
           Handicap Index
           @if (isProvisional()) {
-            <span class="text-secondary-font/70">(provisional)</span>
+            <span data-testid="home-provisional-badge" class="text-secondary-font/70">(provisional)</span>
           }
         </div>
       } @else {
         <div
+          data-testid="home-handicap-index"
           class="text-[3.75rem] min-[380px]:text-[4.5rem] font-bold leading-none tracking-tight text-primary-font opacity-50 shrink-0"
         >
           &mdash;
@@ -54,13 +56,17 @@
       <div
         class="bg-surface rounded-2xl px-3 py-2.5 min-[380px]:px-4 min-[380px]:py-3 flex flex-col items-center justify-center shadow-sm"
       >
-        <span class="text-lg min-[380px]:text-xl font-medium text-primary-font">{{ totalRounds() }}</span>
+        <span data-testid="home-rounds-count" class="text-lg min-[380px]:text-xl font-medium text-primary-font">{{
+          totalRounds()
+        }}</span>
         <span class="text-secondary-font text-xs min-[380px]:text-sm mt-1">Rounds</span>
       </div>
       <div
         class="bg-surface rounded-2xl px-3 py-2.5 min-[380px]:px-4 min-[380px]:py-3 flex flex-col items-center justify-center shadow-sm"
       >
-        <span class="text-lg min-[380px]:text-xl font-medium text-primary-font">{{ totalCoursesPlayed() }}</span>
+        <span data-testid="home-courses-count" class="text-lg min-[380px]:text-xl font-medium text-primary-font">{{
+          totalCoursesPlayed()
+        }}</span>
         <span class="text-secondary-font text-xs min-[380px]:text-sm mt-1">Courses</span>
       </div>
     </div>
@@ -87,6 +93,7 @@
 
         @for (round of recentRounds(); track round.id) {
           <div
+            data-testid="home-recent-round"
             class="bg-surface rounded-2xl p-3 min-[380px]:p-4 flex items-center justify-between shadow-sm shrink-0 gap-2 relative z-20"
           >
             <div class="flex items-center gap-2 min-[380px]:gap-3 flex-1 min-w-0">
@@ -136,6 +143,7 @@
 
     <div class="shrink-0">
       <a
+        data-testid="home-add-round"
         routerLink="/rounds/add"
         class="bg-primary text-onyx font-medium text-base min-[380px]:text-lg rounded-lg py-2.5 min-[380px]:py-3 flex items-center justify-center w-full shadow-lg active:scale-[0.98] transition-transform no-underline"
       >

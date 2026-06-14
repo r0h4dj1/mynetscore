@@ -43,11 +43,13 @@ export class BottomSheetModalComponent {
   private isDragging = false;
   private sheetEl: HTMLElement | null = null;
   private dragDismissThreshold = TALL_DISMISS_THRESHOLD;
+  private closeTimeout: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
     effect(() => {
       const state = this.bottomSheetService.state();
       if (state.isOpen) {
+        this.clearCloseTimeout();
         this.component.set(state.component);
         this.inputs.set(state.inputs);
         this.isOpen.set(true);
@@ -57,16 +59,24 @@ export class BottomSheetModalComponent {
             this.isVisible.set(true);
           });
         });
-      } else {
+      } else if (this.isOpen()) {
         this.isVisible.set(false);
         // Wait for the close animation to finish before removing from DOM
-        setTimeout(() => {
+        this.closeTimeout = setTimeout(() => {
           this.isOpen.set(false);
           this.component.set(null);
           this.inputs.set(null);
+          this.closeTimeout = null;
         }, 300);
       }
     });
+  }
+
+  private clearCloseTimeout(): void {
+    if (this.closeTimeout !== null) {
+      clearTimeout(this.closeTimeout);
+      this.closeTimeout = null;
+    }
   }
 
   protected onBackdropClick(): void {

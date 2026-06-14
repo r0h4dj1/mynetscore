@@ -1,0 +1,9 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "..",
+    "moduleDetection": "force",
+    "types": ["cypress", "node"]
+  },
+  "include": ["**/*.ts", "../src/app/database/db.ts", "../src/app/database/db.window.d.ts"]
+}

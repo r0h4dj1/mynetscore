@@ -6,6 +6,7 @@
       <form [formGroup]="roundForm" (ngSubmit)="onSubmit()" autocomplete="off" class="flex flex-col gap-8">
         <app-round-form-fields [host]="this">
           <button
+            data-testid="round-add-course"
             courseAction
             type="button"
             class="bg-transparent border-none p-0 text-xs font-light text-primary-light active:opacity-80"
@@ -15,6 +16,7 @@
           </button>
 
           <button
+            data-testid="round-add-tee"
             teeAction
             type="button"
             class="bg-transparent border-none p-0 text-xs font-light active:opacity-80"
@@ -29,6 +31,7 @@
 
         <div class="pb-6">
           <button
+            data-testid="round-save"
             type="submit"
             class="w-full h-14 rounded-lg font-medium text-lg border-none outline-none active:scale-[0.98] transition-transform flex items-center justify-center"
             [class.bg-primary]="roundForm.valid && !isSaving"

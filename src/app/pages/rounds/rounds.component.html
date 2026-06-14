@@ -23,7 +23,7 @@
 
   <main class="flex-1 overflow-y-auto">
     @if (allRounds().length === 0) {
-      <div class="flex flex-col items-center justify-center h-64 text-center px-6">
+      <div data-testid="rounds-empty" class="flex flex-col items-center justify-center h-64 text-center px-6">
         <h2 class="text-secondary-font">No rounds recorded</h2>
       </div>
     } @else {
@@ -32,6 +32,7 @@
           @let counting = isCounting(row.id);
           @let legacy = activeTab() === 'all' && isLegacy(i) && !counting;
           <a
+            data-testid="rounds-row"
             [routerLink]="['/rounds', row.id, 'edit']"
             class="rounded-2xl p-4 flex items-center justify-between gap-4 no-underline active:scale-[0.98] transition-transform"
             [class.bg-gradient-to-b]="counting"

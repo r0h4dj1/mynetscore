@@ -52,6 +52,58 @@ describe('BottomSheetModalComponent', () => {
     void promise;
   });
 
+  it('should keep a sheet opened immediately after initial render mounted', () => {
+    fixture.detectChanges();
+
+    const promise = bottomSheetService.open(DummyContentComponent);
+    fixture.detectChanges();
+    vi.advanceTimersByTime(350);
+    fixture.detectChanges();
+
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('[data-testid="sheet"]')).toBeTruthy();
+    expect(el.querySelector('[data-testid="inner"]')).toBeTruthy();
+
+    bottomSheetService.dismiss();
+    vi.advanceTimersByTime(350);
+    void promise;
+  });
+
+  it('should keep a sheet open when reopened during the previous close animation', () => {
+    fixture.detectChanges();
+
+    // Open and fully render the first sheet.
+    const first = bottomSheetService.open(DummyContentComponent);
+    fixture.detectChanges();
+    vi.advanceTimersByTime(16);
+    vi.advanceTimersByTime(16);
+    fixture.detectChanges();
+
+    // Dismiss it, then reopen before the 300ms close timeout fires.
+    bottomSheetService.dismiss();
+    fixture.detectChanges();
+    vi.advanceTimersByTime(100);
+
+    const second = bottomSheetService.open(DummyContentComponent);
+    fixture.detectChanges();
+    vi.advanceTimersByTime(16);
+    vi.advanceTimersByTime(16);
+    fixture.detectChanges();
+
+    // Advance well past the original close timeout; the stale close must not run.
+    vi.advanceTimersByTime(300);
+    fixture.detectChanges();
+
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('[data-testid="sheet"]')).toBeTruthy();
+    expect(el.querySelector('[data-testid="inner"]')).toBeTruthy();
+
+    bottomSheetService.dismiss();
+    vi.advanceTimersByTime(350);
+    void first;
+    void second;
+  });
+
   it('should dismiss the sheet when backdrop is clicked', () => {
     fixture.detectChanges();
 

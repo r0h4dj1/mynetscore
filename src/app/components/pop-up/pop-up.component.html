@@ -1,4 +1,4 @@
-<div class="absolute inset-0 z-20 flex items-center justify-center bg-black/60 px-4">
+<div data-testid="popup" class="absolute inset-0 z-20 flex items-center justify-center bg-black/60 px-4">
   <div class="w-full max-w-sm overflow-hidden rounded-[28px] border border-borders bg-surface text-center">
     <div class="px-6 pt-8 pb-4">
       <h2 class="m-0 text-xl font-medium text-primary-font">{{ title }}</h2>
@@ -11,6 +11,7 @@
     <div class="flex border-t border-borders">
       @if (secondaryButtonText) {
         <button
+          data-testid="popup-secondary"
           type="button"
           class="flex-1 py-4 text-lg font-medium text-primary-font border-r border-borders outline-none active:bg-borders transition-colors"
           (click)="secondaryAction.emit()"
@@ -19,6 +20,7 @@
         </button>
       }
       <button
+        data-testid="popup-primary"
         type="button"
         class="flex-1 py-4 text-lg font-medium text-bright-amber outline-none active:bg-borders transition-colors"
         (click)="primaryAction.emit()"
